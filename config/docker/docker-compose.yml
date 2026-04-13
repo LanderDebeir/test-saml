@@ -1,20 +1,21 @@
 services:
-  database:
+  saml-test-database:
     image: postgres
     restart: always
-    env_file: ./.postgres.env
+    env_file:
+      -  ./.postgres.env
     ports:
-      - 15000:5000
+      - 40001:5000
     networks:
     - saml-test
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql
 
-  adminer:
+  saml-test-adminer:
     image: adminer
     restart: always
     ports:
-      - 8082:8080
+      - 40002:8080
     networks:
       - saml-test
 
