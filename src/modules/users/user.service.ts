@@ -1,5 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { UserDAO } from "./types/daos";
 
 @Injectable()
 export class UserService {
@@ -18,7 +19,7 @@ export class UserService {
         }
     }
 
-    async getByEmail({email}: {email: string}) {
+    async getByEmail({email}: {email: string}) : Promise<null | UserDAO> {
         try{
             return this.prisma.user.findUnique({
                 where: {email}

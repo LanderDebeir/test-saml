@@ -27,6 +27,7 @@
     "@prisma/client": "^7.7.0",
     "dotenv": "^17.4.2",
     "pako": "^2.1.0",
+    "passport": "^0.7.0",
     "passport-saml": "^3.2.4",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
