@@ -7,7 +7,7 @@ import { IdentityProvider } from "samlify";
 export class SamlService {
     private readonly logger = new Logger(SamlService.name);
     private readonly idp = IdentityProvider({
-        metadata: readFileSync("config/certificates/metadata.xml")
+        metadata: readFileSync("config/certificates/metadata_idp.xml")
     });
     constructor(
         @Inject (forwardRef(() => UserService))
