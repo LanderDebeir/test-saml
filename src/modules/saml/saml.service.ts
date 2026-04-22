@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
 import { UserService } from "../users/user.service";
 import { Strategy  as SamlStrategy,} from "passport-saml";
-import passport from "passport"
+import { passport } from "passport"
 import {readFileSync } from "fs";
 
 @Injectable()

@@ -1,4 +1,4 @@
-import pako from "pako";
+import {pako} from "pako";
 import { XmlAttributeFields } from "src/types";
 import { xml2js } from "xml-js";
 
