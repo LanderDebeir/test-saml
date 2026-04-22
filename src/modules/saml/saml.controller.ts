@@ -7,8 +7,8 @@ export class SamlController {
         private readonly samlService: SamlService
     ) {}
 
-    @Post()
-    authenticate() {
-        return this.samlService.authenticate();
-    }
+    // @Post()
+    // authenticate() {
+    //     return this.samlService.authenticate();
+    // }
 }
