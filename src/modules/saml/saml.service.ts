@@ -14,6 +14,10 @@ export class SamlService {
         private readonly userService: UserService
     ) {}
 
+    async getMetadata() {
+        return this.idp.getMetadata();
+    }
+
     private async findOrCreateUser({email, password}: {email: string, password: string}) {
         let user = await this.userService.getByEmail({email, password});
 

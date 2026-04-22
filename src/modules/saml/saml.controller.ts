@@ -1,4 +1,4 @@
-import { Controller, Post } from "@nestjs/common";
+import { Controller, Get } from "@nestjs/common";
 import { SamlService } from "./saml.service";
 
 @Controller({path: "auth", version: "1"})
@@ -7,8 +7,8 @@ export class SamlController {
         private readonly samlService: SamlService
     ) {}
 
-    // @Post()
-    // authenticate() {
-    //     return this.samlService.authenticate();
-    // }
+    @Get("metadata")
+    getMetadata() {
+        return this.samlService.getMetadata();
+    }
 }
