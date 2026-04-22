@@ -35,8 +35,8 @@ export class SamlService {
         let user = await this.userService.getByEmail({email, password});
 
         if (!user) {
-            user = await this.userService.createUser({email, name: email.split("@")[0], password});
+            user = await this.userService.createUser({email, password});
         }
-        return {email: user?.email, name: user?.name};
+        return {email: user?.email};
     }
 }

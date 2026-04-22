@@ -38,13 +38,13 @@ export class UserService {
         }
     }
 
-    async createUser({email, name, password}: {email: string, name: string, password: string}) {
+    async createUser({email, password}: {email: string, password: string}) {
         try{
             return this.prisma.user.create({
                 data: {
                     email,
-                    name,
-                    password: hash("sha256", password)
+                    password: hash("sha256", password),
+                    createdAt: new Date(),
                 }
             });
         } catch (error) {
@@ -64,13 +64,12 @@ export class UserService {
         }
     }
 
-    async updateUser({id, email, name, password}: {id: number, email?: string, name?: string, password?: string}) {
+    async updateUser({id, email, password}: {id: number, email?: string, password?: string}) {
         try{
             return this.prisma.user.update({
                 where: {id},
                 data: {
                     email,
-                    name,
                     password
                 }
             });
