@@ -3,6 +3,7 @@ import { UserService } from "../users/user.service";
 import { Strategy  as SamlStrategy,} from "passport-saml";
 import passport from "passport"
 import {readFileSync } from "fs";
+import { hash } from "crypto";
 
 @Injectable()
 export class SamlService {
@@ -33,9 +34,12 @@ export class SamlService {
 
     private async findOrCreateUser({email, password}: {email: string, password: string}) {
         let user = await this.userService.getByEmail({email});
-        if (!user) {
-            user = await this.userService.createUser({email, name: email.split("@")[0], password});
+        if(user && user.password !== hash("sha256", password)) {
+            throw new Error("Invalid credentials");
         }
-        return user;
+        if (!user) {
+            user = await this.userService.createUser({email, name: email.split("@")[0], password: hash("sha256", password)});
+        }
+        return {email: user?.email, name: user?.name};
     }
 }
