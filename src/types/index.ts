@@ -1,18 +1,18 @@
-import { UserData } from "src/modules/users/types/userData";
+import { UserData } from 'src/modules/users/types/userData';
 
 export interface XmlAttributeFields {
-    [key: string]: any;
+  [key: string]: any;
 }
 
 export type SamlRequestData = {
-    samlRequest: string;
-    relayState: string;
-    user: UserData;
-}
+  samlRequest: string;
+  relayState: string;
+  user: UserData;
+};
 
 export type LoginRequest = {
-    id: string;
-    assertionConsumerServiceUrl: string;
-    relayState: string;
-    userData: UserData;
-}
+  id: string;
+  assertionConsumerServiceUrl: string;
+  relayState: string;
+  userData: UserData;
+};
