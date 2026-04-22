@@ -30,4 +30,12 @@ export class SamlService {
             }
         ))
     }
+
+    private async findOrCreateUser({email, password}: {email: string, password: string}) {
+        let user = await this.userService.getByEmail({email});
+        if (!user) {
+            user = await this.userService.createUser({email, name: email.split("@")[0], password});
+        }
+        return user;
+    }
 }
