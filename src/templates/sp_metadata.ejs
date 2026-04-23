@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="<%= issuer%>">
+  <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="<%= assertionConsumerServiceUrl %>" index="1" isDefault="true"/>
+  </SPSSODescriptor>
+</EntityDescriptor>

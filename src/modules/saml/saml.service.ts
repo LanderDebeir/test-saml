@@ -10,6 +10,7 @@ import { UserService } from '../users/user.service';
 import { readFileSync } from 'fs';
 import { IdentityProvider, ServiceProvider } from 'samlify';
 import { extractXmlAttributeFields, inflateXml } from 'src/utils';
+import ejs from 'ejs';
 
 @Injectable()
 export class SamlService {
@@ -97,7 +98,9 @@ export class SamlService {
     return context;
   }
 
-  private extractIssuerFromAuthnRequest(authnRequestXml: string): string | null {
+  private extractIssuerFromAuthnRequest(
+    authnRequestXml: string,
+  ): string | null {
     const issuerMatch = authnRequestXml.match(
       /<[^>]*:?Issuer[^>]*>([^<]+)<\/[^>]*:?Issuer>/,
     );
@@ -111,12 +114,15 @@ export class SamlService {
     issuer: string;
     assertionConsumerServiceUrl: string;
   }): string {
-    return `<?xml version="1.0"?>
-<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="${issuer}">
-  <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
-    <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="${assertionConsumerServiceUrl}" index="1" isDefault="true"/>
-  </SPSSODescriptor>
-</EntityDescriptor>`;
+    const template = readFileSync(
+      'config/certificates/metadata_sp_template.xml',
+      'utf-8',
+    );
+    const compiledTemplate = ejs.compile(template);
+    return compiledTemplate({
+      issuer,
+      assertionConsumerServiceUrl,
+    });
   }
 
   private async findOrCreateUser({
