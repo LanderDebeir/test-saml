@@ -9,8 +9,11 @@ import {
 import { UserService } from '../users/user.service';
 import { readFileSync } from 'fs';
 import { IdentityProvider, ServiceProvider } from 'samlify';
-import { extractXmlAttributeFields, inflateXml } from 'src/utils';
-import ejs from 'ejs';
+import {
+  buildXmlFromTemplate,
+  extractXmlAttributeFields,
+  inflateXml,
+} from 'src/utils';
 
 @Injectable()
 export class SamlService {
@@ -27,7 +30,7 @@ export class SamlService {
     return this.idp.getMetadata();
   }
 
-  async loginExternalServiceProvider({
+  async login({
     samlRequest,
     relayState,
     email,
@@ -114,14 +117,9 @@ export class SamlService {
     issuer: string;
     assertionConsumerServiceUrl: string;
   }): string {
-    const template = readFileSync(
-      'config/certificates/metadata_sp_template.xml',
-      'utf-8',
-    );
-    const compiledTemplate = ejs.compile(template);
-    return compiledTemplate({
-      issuer,
-      assertionConsumerServiceUrl,
+    return buildXmlFromTemplate({
+      templatePath: '../../templates/sp_metadata.ejs',
+      data: { issuer, assertionConsumerServiceUrl },
     });
   }
 

@@ -1,3 +1,5 @@
+import ejs from 'ejs';
+import { readFileSync } from 'fs';
 import { pako } from 'pako';
 import { XmlAttributeFields } from 'src/types';
 import { xml2js } from 'xml-js';
@@ -22,4 +24,16 @@ export const extractXmlAttributeFields = (
   });
 
   return xmlAttributeFields;
+};
+
+export const buildXmlFromTemplate = ({
+  templatePath,
+  data,
+}: {
+  templatePath: string;
+  data: Record<string, any>;
+}): string => {
+  const template = readFileSync(templatePath, 'utf-8');
+  const compiledTemplate = ejs.compile(template);
+  return compiledTemplate(data);
 };

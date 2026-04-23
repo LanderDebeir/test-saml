@@ -13,7 +13,7 @@ export class SamlController {
 
   @Post('login')
   @HttpCode(200)
-  async loginExternalServiceProvider(
+  async login(
     @Body()
     body: {
       samlRequest: string;
@@ -23,7 +23,7 @@ export class SamlController {
     },
     @Res({ passthrough: true }) response: Response,
   ) {
-    const context = await this.samlService.loginExternalServiceProvider(body);
+    const context = await this.samlService.login(body);
     response.type('text/html');
     return context;
   }
