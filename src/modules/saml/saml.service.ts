@@ -191,7 +191,12 @@ export class SamlService {
     let user = await this.userService.getByEmail({ email, password });
 
     if (!user) {
-      user = await this.userService.createUser({ email, password, displayName: email.split('@')[0], imageUrl: 'https://www.pngmart.com/files/23/Profile-PNG-Photo.png' });
+      user = await this.userService.createUser({
+        email,
+        password,
+        displayName: email.split('@')[0],
+        imageUrl: 'https://www.pngmart.com/files/23/Profile-PNG-Photo.png',
+      });
     }
     return user;
   }

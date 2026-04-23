@@ -42,7 +42,17 @@ export class UserService {
     }
   }
 
-  async createUser({ email, password, displayName, imageUrl }: { email: string; password: string; displayName: string; imageUrl: string }) {
+  async createUser({
+    email,
+    password,
+    displayName,
+    imageUrl,
+  }: {
+    email: string;
+    password: string;
+    displayName: string;
+    imageUrl: string;
+  }) {
     try {
       return this.prisma.user.create({
         data: {

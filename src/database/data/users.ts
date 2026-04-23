@@ -1,6 +1,13 @@
 import { hashPassword } from 'src/utils';
 
-export const users: { id: number; email: string; displayName: string; password: string; imageUrl: string; createdAt: Date }[] = [
+export const users: {
+  id: number;
+  email: string;
+  displayName: string;
+  password: string;
+  imageUrl: string;
+  createdAt: Date;
+}[] = [
   {
     id: 1234,
     email: 'lander.debeir@jimber.io',
