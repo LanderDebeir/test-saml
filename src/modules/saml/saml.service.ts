@@ -1,7 +1,15 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from '../users/user.service';
 import { readFileSync } from 'fs';
-import { IdentityProvider } from 'samlify';
+import { IdentityProvider, ServiceProvider } from 'samlify';
+import { extractXmlAttributeFields, inflateXml } from 'src/utils';
 
 @Injectable()
 export class SamlService {
@@ -18,13 +26,106 @@ export class SamlService {
     return this.idp.getMetadata();
   }
 
+  async loginExternalServiceProvider({
+    samlRequest,
+    relayState,
+    email,
+    password,
+  }: {
+    samlRequest: string;
+    relayState?: string;
+    email: string;
+    password: string;
+  }): Promise<string> {
+    if (!samlRequest || !email || !password) {
+      throw new BadRequestException(
+        'samlRequest, email and password are required',
+      );
+    }
+
+    const inflatedXml = inflateXml(samlRequest);
+    const authnRequestFields = extractXmlAttributeFields(inflatedXml, [
+      'ID',
+      'AssertionConsumerServiceURL',
+    ]);
+
+    const requestId = authnRequestFields.id;
+    const assertionConsumerServiceUrl =
+      authnRequestFields.assertionconsumerserviceurl;
+    const issuer = this.extractIssuerFromAuthnRequest(inflatedXml);
+
+    if (!requestId || !assertionConsumerServiceUrl || !issuer) {
+      throw new BadRequestException('Invalid SAML AuthnRequest');
+    }
+
+    const user = await this.findOrCreateUser({ email, password });
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const sp = ServiceProvider({
+      metadata: this.buildServiceProviderMetadata({
+        issuer,
+        assertionConsumerServiceUrl,
+      }),
+    });
+
+    const { context } = await this.idp.createLoginResponse(
+      sp,
+      {
+        extract: {
+          request: {
+            id: requestId,
+          },
+        },
+      },
+      'post',
+      {
+        email: user.email,
+        nameID: user.email,
+        sessionIndex: requestId,
+        attributes: {
+          email: user.email,
+        },
+      },
+      undefined,
+      undefined,
+      relayState,
+    );
+
+    this.logger.log(`Generated SAML response for SP issuer ${issuer}`);
+    return context;
+  }
+
+  private extractIssuerFromAuthnRequest(authnRequestXml: string): string | null {
+    const issuerMatch = authnRequestXml.match(
+      /<[^>]*:?Issuer[^>]*>([^<]+)<\/[^>]*:?Issuer>/,
+    );
+    return issuerMatch?.[1] ?? null;
+  }
+
+  private buildServiceProviderMetadata({
+    issuer,
+    assertionConsumerServiceUrl,
+  }: {
+    issuer: string;
+    assertionConsumerServiceUrl: string;
+  }): string {
+    return `<?xml version="1.0"?>
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="${issuer}">
+  <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="${assertionConsumerServiceUrl}" index="1" isDefault="true"/>
+  </SPSSODescriptor>
+</EntityDescriptor>`;
+  }
+
   private async findOrCreateUser({
     email,
     password,
   }: {
     email: string;
     password: string;
-  }) {
+  }): Promise<{ email: string }> {
     let user = await this.userService.getByEmail({ email, password });
 
     if (!user) {
