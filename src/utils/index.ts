@@ -1,3 +1,4 @@
+import { hash } from 'crypto';
 import ejs from 'ejs';
 import { readFileSync } from 'fs';
 import { pako } from 'pako';
@@ -36,4 +37,8 @@ export const buildXmlFromTemplate = ({
   const template = readFileSync(templatePath, 'utf-8');
   const compiledTemplate = ejs.compile(template);
   return compiledTemplate(data);
+};
+
+export const hashPassword = (password: string): string => {
+  return hash('sha256', password);
 };

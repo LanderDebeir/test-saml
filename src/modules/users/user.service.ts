@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserDAO } from './types/daos';
-import { hash } from 'crypto';
+import { hashPassword } from 'src/utils';
 
 @Injectable()
 export class UserService {
@@ -13,7 +13,7 @@ export class UserService {
       const user = await this.prisma.user.findUnique({
         where: { id },
       });
-      if (user && user.password !== hash('sha256', password)) {
+      if (user && user.password !== hashPassword(password)) {
         throw new Error('Invalid credentials');
       }
       return user;
@@ -33,7 +33,7 @@ export class UserService {
       const user = await this.prisma.user.findUnique({
         where: { email },
       });
-      if (user && user.password !== hash('sha256', password)) {
+      if (user && user.password !== hashPassword(password)) {
         throw new Error('Invalid credentials');
       }
       return user;
@@ -47,7 +47,7 @@ export class UserService {
       return this.prisma.user.create({
         data: {
           email,
-          password: hash('sha256', password),
+          password: hashPassword(password),
           createdAt: new Date(),
         },
       });
@@ -78,11 +78,14 @@ export class UserService {
     password?: string;
   }) {
     try {
+      const user = await this.prisma.user.findUnique({ where: { id } });
+      if (!user) throw new Error('User not found');
+
       return this.prisma.user.update({
         where: { id },
         data: {
-          email,
-          password,
+          email: email ? email : user.email,
+          password: password ? hashPassword(password) : user.password,
         },
       });
     } catch (error) {
