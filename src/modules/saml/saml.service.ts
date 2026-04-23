@@ -187,7 +187,7 @@ export class SamlService {
   }: {
     email: string;
     password: string;
-  }): Promise<UserDAO | null> {
+  }): Promise<UserDAO> {
     let user = await this.userService.getByEmail({ email, password });
 
     if (!user) {
