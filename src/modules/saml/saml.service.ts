@@ -14,6 +14,8 @@ import {
   extractXmlAttributeFields,
   inflateXml,
 } from 'src/utils';
+import { UserData } from '../users/types/userData';
+import { UserDAO } from '../users/types/daos';
 
 @Injectable()
 export class SamlService {
@@ -185,12 +187,12 @@ export class SamlService {
   }: {
     email: string;
     password: string;
-  }): Promise<{ email: string }> {
+  }): Promise<UserDAO | null> {
     let user = await this.userService.getByEmail({ email, password });
 
     if (!user) {
-      user = await this.userService.createUser({ email, password });
+      user = await this.userService.createUser({ email, password, displayName: email.split('@')[0], imageUrl: 'https://www.pngmart.com/files/23/Profile-PNG-Photo.png' });
     }
-    return { email: user?.email };
+    return user;
   }
 }
