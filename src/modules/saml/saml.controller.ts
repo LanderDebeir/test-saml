@@ -27,4 +27,19 @@ export class SamlController {
     response.type('text/html');
     return context;
   }
+
+  @Post('logout')
+  @HttpCode(200)
+  async logout(
+    @Body()
+    body: {
+      samlRequest: string;
+      relayState?: string;
+    },
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const context = await this.samlService.logout(body);
+    response.type('text/html');
+    return context;
+  }
 }

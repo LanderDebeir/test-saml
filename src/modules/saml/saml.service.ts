@@ -101,6 +101,56 @@ export class SamlService {
     return context;
   }
 
+  async logout({
+    samlRequest,
+    relayState,
+  }: {
+    samlRequest: string;
+    relayState?: string;
+  }): Promise<string> {
+    if (!samlRequest) {
+      throw new BadRequestException('samlRequest is required');
+    }
+
+    const inflatedXml = inflateXml(samlRequest);
+    const logoutRequestFields = extractXmlAttributeFields(inflatedXml, [
+      'ID',
+      'Destination',
+    ]);
+
+    const requestId = logoutRequestFields.id;
+    const singleLogoutServiceUrl = logoutRequestFields.destination;
+    const issuer = this.extractIssuerFromAuthnRequest(inflatedXml);
+
+    if (!requestId || !singleLogoutServiceUrl || !issuer) {
+      throw new BadRequestException('Invalid SAML LogoutRequest');
+    }
+
+    const sp = ServiceProvider({
+      metadata: this.buildServiceProviderMetadata({
+        issuer,
+        assertionConsumerServiceUrl: singleLogoutServiceUrl,
+        singleLogoutServiceUrl,
+      }),
+    });
+
+    const { context } = await this.idp.createLogoutResponse(
+      sp,
+      {
+        extract: {
+          request: {
+            id: requestId,
+          },
+        },
+      },
+      'post',
+      relayState,
+    );
+
+    this.logger.log(`Generated SAML logout response for SP issuer ${issuer}`);
+    return context;
+  }
+
   private extractIssuerFromAuthnRequest(
     authnRequestXml: string,
   ): string | null {
@@ -113,13 +163,19 @@ export class SamlService {
   private buildServiceProviderMetadata({
     issuer,
     assertionConsumerServiceUrl,
+    singleLogoutServiceUrl,
   }: {
     issuer: string;
     assertionConsumerServiceUrl: string;
+    singleLogoutServiceUrl?: string;
   }): string {
     return buildXmlFromTemplate({
       templatePath: '../../templates/sp_metadata.ejs',
-      data: { issuer, assertionConsumerServiceUrl },
+      data: {
+        issuer,
+        assertionConsumerServiceUrl,
+        singleLogoutServiceUrl,
+      },
     });
   }
 
