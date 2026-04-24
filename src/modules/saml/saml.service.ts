@@ -14,7 +14,6 @@ import {
   extractXmlAttributeFields,
   inflateXml,
 } from 'src/utils';
-import { UserData } from '../users/types/userData';
 import { UserDAO } from '../users/types/daos';
 
 @Injectable()
