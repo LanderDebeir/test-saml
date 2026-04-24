@@ -64,7 +64,7 @@ export class SamlService {
       throw new BadRequestException('Invalid SAML AuthnRequest');
     }
 
-    const user = await this.findOrCreateUser({ email, password });
+    const user = await this.findUser({ email, password });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -181,7 +181,7 @@ export class SamlService {
     });
   }
 
-  private async findOrCreateUser({
+  private async findUser({
     email,
     password,
   }: {
@@ -191,12 +191,7 @@ export class SamlService {
     let user = await this.userService.getByEmail({ email, password });
 
     if (!user) {
-      user = await this.userService.createUser({
-        email,
-        password,
-        displayName: email.split('@')[0],
-        imageUrl: 'https://www.pngmart.com/files/23/Profile-PNG-Photo.png',
-      });
+      throw new UnauthorizedException('Invalid credentials');
     }
     return user;
   }
