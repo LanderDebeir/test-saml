@@ -18,8 +18,6 @@ export class SamlController {
     body: {
       samlRequest: string;
       relayState?: string;
-      email: string;
-      password: string;
     },
     @Res({ passthrough: true }) response: Response,
   ) {

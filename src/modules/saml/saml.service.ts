@@ -11,6 +11,7 @@ import { readFileSync } from 'fs';
 import { IdentityProvider, ServiceProvider } from 'samlify';
 import {
   buildXmlFromTemplate,
+  extractSamlAttributeFields,
   extractXmlAttributeFields,
   inflateXml,
 } from 'src/utils';
@@ -34,18 +35,12 @@ export class SamlService {
   async login({
     samlRequest,
     relayState,
-    email,
-    password,
   }: {
     samlRequest: string;
     relayState?: string;
-    email: string;
-    password: string;
   }): Promise<string> {
-    if (!samlRequest || !email || !password) {
-      throw new BadRequestException(
-        'samlRequest, email and password are required',
-      );
+    if (!samlRequest) {
+      throw new BadRequestException('samlRequest is required');
     }
 
     const inflatedXml = inflateXml(samlRequest);
@@ -58,12 +53,28 @@ export class SamlService {
     const assertionConsumerServiceUrl =
       authnRequestFields.assertionconsumerserviceurl;
     const issuer = this.extractIssuerFromAuthnRequest(inflatedXml);
+    const samlCredentialFields = extractSamlAttributeFields(inflatedXml, [
+      'email',
+      'password',
+    ]);
 
     if (!requestId || !assertionConsumerServiceUrl || !issuer) {
       throw new BadRequestException('Invalid SAML AuthnRequest');
     }
 
-    const user = await this.findUser({ email, password });
+    const resolvedEmail = samlCredentialFields.email;
+    const resolvedPassword = samlCredentialFields.password;
+
+    if (!resolvedEmail || !resolvedPassword) {
+      throw new BadRequestException(
+        'email and password must be provided as SAML attributes',
+      );
+    }
+
+    const user = await this.findUser({
+      email: resolvedEmail,
+      password: resolvedPassword,
+    });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
