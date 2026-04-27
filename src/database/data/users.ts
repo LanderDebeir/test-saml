@@ -1,4 +1,5 @@
 import { hashPassword } from 'src/utils';
+import 'dotenv/config';
 
 export const users: {
   id: number;
@@ -10,10 +11,10 @@ export const users: {
 }[] = [
   {
     id: 1234,
-    email: 'lander.debeir@jimber.io',
-    displayName: 'Lander Debeir',
-    password: hashPassword('password123'),
-    imageUrl: 'https://www.pngmart.com/files/23/Profile-PNG-Photo.png',
+    email: process.env.TEST_USER_EMAIL || '',
+    displayName: process.env.TEST_USER_NAME || '',
+    password: hashPassword(process.env.TEST_USER_PASSWORD || ''),
+    imageUrl: process.env.TEST_USER_PFP || '',
     createdAt: new Date(),
   },
 ];
