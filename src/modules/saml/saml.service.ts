@@ -96,6 +96,8 @@ export class SamlService {
         sessionIndex: requestId,
         attributes: {
           email: user.email,
+          displayName: user.displayName,
+          imageUrl: user.imageUrl,
         },
       },
     );
