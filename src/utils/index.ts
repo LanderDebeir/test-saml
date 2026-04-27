@@ -27,46 +27,6 @@ export const extractXmlAttributeFields = (
   return xmlAttributeFields;
 };
 
-const normalizeElementName = (name?: string): string => {
-  if (!name) return '';
-  return name.includes(':') ? (name.split(':').pop() ?? name) : name;
-};
-
-const decodeXmlEntities = (value: string): string => {
-  return value
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'");
-};
-
-const extractAttributeValue = (node: any): string | undefined => {
-  if (!node?.elements || !Array.isArray(node.elements)) {
-    return undefined;
-  }
-
-  const attributeValueElement = node.elements.find(
-    (child: any) =>
-      child?.type === 'element' &&
-      normalizeElementName(child.name) === 'AttributeValue',
-  );
-
-  if (!attributeValueElement?.elements) {
-    return undefined;
-  }
-
-  const textNode = attributeValueElement.elements.find(
-    (child: any) => child?.type === 'text' || child?.type === 'cdata',
-  );
-
-  if (!textNode?.text && !textNode?.cdata) {
-    return undefined;
-  }
-
-  return decodeXmlEntities((textNode.text ?? textNode.cdata).trim());
-};
-
 export const extractSamlAttributeFields = (
   inflatedXml: string,
   attributeFields: string[],
@@ -124,4 +84,44 @@ export const buildXmlFromTemplate = ({
 
 export const hashPassword = (password: string): string => {
   return hash('sha256', password);
+};
+
+const normalizeElementName = (name?: string): string => {
+  if (!name) return '';
+  return name.includes(':') ? (name.split(':').pop() ?? name) : name;
+};
+
+const decodeXmlEntities = (value: string): string => {
+  return value
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'");
+};
+
+const extractAttributeValue = (node: any): string | undefined => {
+  if (!node?.elements || !Array.isArray(node.elements)) {
+    return undefined;
+  }
+
+  const attributeValueElement = node.elements.find(
+    (child: any) =>
+      child?.type === 'element' &&
+      normalizeElementName(child.name) === 'AttributeValue',
+  );
+
+  if (!attributeValueElement?.elements) {
+    return undefined;
+  }
+
+  const textNode = attributeValueElement.elements.find(
+    (child: any) => child?.type === 'text' || child?.type === 'cdata',
+  );
+
+  if (!textNode?.text && !textNode?.cdata) {
+    return undefined;
+  }
+
+  return decodeXmlEntities((textNode.text ?? textNode.cdata).trim());
 };
