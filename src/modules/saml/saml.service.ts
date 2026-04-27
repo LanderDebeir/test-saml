@@ -184,7 +184,7 @@ export class SamlService {
     email: string;
     password: string;
   }): Promise<UserDAO> {
-    let user = await this.userService.getByEmail({ email, password });
+    const user = await this.userService.getByEmail({ email, password });
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
