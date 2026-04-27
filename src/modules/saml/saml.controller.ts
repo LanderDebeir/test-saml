@@ -17,7 +17,6 @@ export class SamlController {
     @Body()
     body: {
       samlRequest: string;
-      relayState?: string;
     },
     @Res({ passthrough: true }) response: Response,
   ) {
@@ -32,7 +31,6 @@ export class SamlController {
     @Body()
     body: {
       samlRequest: string;
-      relayState?: string;
     },
     @Res({ passthrough: true }) response: Response,
   ) {

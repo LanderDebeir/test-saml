@@ -32,13 +32,7 @@ export class SamlService {
     return this.idp.getMetadata();
   }
 
-  async login({
-    samlRequest,
-    relayState,
-  }: {
-    samlRequest: string;
-    relayState?: string;
-  }): Promise<string> {
+  async login({ samlRequest }: { samlRequest: string }): Promise<string> {
     if (!samlRequest) {
       throw new BadRequestException('samlRequest is required');
     }
@@ -104,22 +98,13 @@ export class SamlService {
           email: user.email,
         },
       },
-      undefined,
-      undefined,
-      relayState,
     );
 
     this.logger.log(`Generated SAML response for SP issuer ${issuer}`);
     return context;
   }
 
-  async logout({
-    samlRequest,
-    relayState,
-  }: {
-    samlRequest: string;
-    relayState?: string;
-  }): Promise<string> {
+  async logout({ samlRequest }: { samlRequest: string }): Promise<string> {
     if (!samlRequest) {
       throw new BadRequestException('samlRequest is required');
     }
@@ -156,7 +141,6 @@ export class SamlService {
         },
       },
       'post',
-      relayState,
     );
 
     this.logger.log(`Generated SAML logout response for SP issuer ${issuer}`);
