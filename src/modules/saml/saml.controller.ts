@@ -16,11 +16,11 @@ export class SamlController {
   async login(
     @Body()
     body: {
-      samlRequest: string;
+      SAMLRequest: string;
     },
     @Res({ passthrough: true }) response: Response,
   ) {
-    const context = await this.samlService.login(body);
+    const context = await this.samlService.login({samlRequest: body.SAMLRequest});
     response.type('text/html');
     return context;
   }
