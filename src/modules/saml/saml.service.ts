@@ -43,15 +43,15 @@ export class SamlService {
   }
 
   async login({
-    samlRequest,
+    SAMLRequest,
   }: {
-    samlRequest: string;
+    SAMLRequest: string;
   }): Promise<{ context: string; acsUrl: string }> {
-    if (!samlRequest) {
-      throw new BadRequestException('samlRequest is required');
+    if (!SAMLRequest) {
+      throw new BadRequestException('SAML Request is required');
     }
 
-    const inflatedXml = inflateXml(samlRequest);
+    const inflatedXml = inflateXml(SAMLRequest);
     const authnRequestFields = extractXmlAttributeFields(inflatedXml, [
       'ID',
       'AssertionConsumerServiceURL',
@@ -121,15 +121,15 @@ export class SamlService {
   }
 
   async logout({
-    samlRequest,
+    SAMLRequest,
   }: {
-    samlRequest: string;
+    SAMLRequest: string;
   }): Promise<{ context: string; acsUrl: string }> {
-    if (!samlRequest) {
-      throw new BadRequestException('samlRequest is required');
+    if (!SAMLRequest) {
+      throw new BadRequestException('SAML Request is required');
     }
 
-    const inflatedXml = inflateXml(samlRequest);
+    const inflatedXml = inflateXml(SAMLRequest);
     const logoutRequestFields = extractXmlAttributeFields(inflatedXml, [
       'ID',
       'Destination',

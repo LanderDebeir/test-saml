@@ -21,9 +21,7 @@ export class SamlController {
     },
     @Res({ passthrough: true }) response: Response,
   ) {
-    const { context, acsUrl } = await this.samlService.login({
-      samlRequest: body.SAMLRequest,
-    });
+    const { context, acsUrl } = await this.samlService.login(body);
     response.type('text/html');
     return wrapInAutoSubmitForm(context, acsUrl);
   }
@@ -33,7 +31,7 @@ export class SamlController {
   async logout(
     @Body()
     body: {
-      samlRequest: string;
+      SAMLRequest: string;
     },
     @Res({ passthrough: true }) response: Response,
   ) {
