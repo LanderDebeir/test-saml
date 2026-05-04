@@ -6,6 +6,10 @@
     <body>
         <form method="POST" action="<%= acsUrl %>" id="samlForm">
             <input type="hidden" name="SAMLResponse" value="<%= samlResponse %>" />
+            <noscript>
+                <p>JavaScript is disabled. Please click the button below to submit the form.</p>
+                <input type="submit" value="Submit" />
+            </noscript>
         </form>
         <script>
         document.getElementById('samlForm').submit();
