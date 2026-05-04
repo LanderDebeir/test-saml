@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Post, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { SamlService } from './saml.service';
-import { wrapInAutoSubmitForm } from 'src/utils';
+import { buildFromTemplate} from 'src/utils';
 
 @Controller({ version: '1' })
 export class SamlController {
@@ -23,7 +23,7 @@ export class SamlController {
   ) {
     const { context, acsUrl } = await this.samlService.login(body);
     response.type('text/html');
-    return wrapInAutoSubmitForm(context, acsUrl);
+    return this.wrapInAutoSubmitForm(context, acsUrl);
   }
 
   @Post('logout')
@@ -37,6 +37,13 @@ export class SamlController {
   ) {
     const { context, acsUrl } = await this.samlService.logout(body);
     response.type('text/html');
-    return wrapInAutoSubmitForm(context, acsUrl);
+    return this.wrapInAutoSubmitForm(context, acsUrl);
+  }
+
+  private wrapInAutoSubmitForm(samlResponse: string, acsUrl: string): string {
+    return buildFromTemplate({
+      templatePath: 'src/templates/auto_submit_form.ejs',
+      data: { samlResponse, acsUrl },
+    });
   }
 }

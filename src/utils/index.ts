@@ -86,16 +86,6 @@ export const hashPassword = (password: string): string => {
   return hash('sha256', password);
 };
 
-export const wrapInAutoSubmitForm = (
-  samlResponse: string,
-  acsUrl: string,
-): string => {
-  return buildFromTemplate({
-    templatePath: 'src/templates/auto_submit_form.ejs',
-    data: { samlResponse, acsUrl },
-  });
-};
-
 const normalizeElementName = (name?: string): string => {
   if (!name) return '';
   return name.includes(':') ? (name.split(':').pop() ?? name) : name;
