@@ -1,7 +1,7 @@
 import { hash } from 'crypto';
 import ejs from 'ejs';
 import { readFileSync } from 'fs';
-import { pako } from 'pako';
+import pako from 'pako';
 import { XmlAttributeFields } from 'src/types';
 import { xml2js } from 'xml-js';
 
