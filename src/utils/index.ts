@@ -70,7 +70,7 @@ export const extractSamlAttributeFields = (
   return samlAttributeFields;
 };
 
-export const buildXmlFromTemplate = ({
+export const buildFromTemplate = ({
   templatePath,
   data,
 }: {
@@ -90,9 +90,10 @@ export const wrapInAutoSubmitForm = (
   samlResponse: string,
   acsUrl: string,
 ): string => {
-  const template = readFileSync('src/templates/auto_submit_form.ejs', 'utf-8');
-  const compiledTemplate = ejs.compile(template);
-  return compiledTemplate({ samlResponse, acsUrl });
+  return buildFromTemplate({
+    templatePath: 'src/templates/auto_submit_form.ejs',
+    data: { samlResponse, acsUrl },
+  });
 };
 
 const normalizeElementName = (name?: string): string => {

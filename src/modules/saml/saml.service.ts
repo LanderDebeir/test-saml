@@ -11,7 +11,7 @@ import { readFileSync } from 'fs';
 import { IdentityProvider, ServiceProvider } from 'samlify';
 import { resolve } from 'path';
 import {
-  buildXmlFromTemplate,
+  buildFromTemplate,
   extractSamlAttributeFields,
   extractXmlAttributeFields,
   inflateXml,
@@ -185,7 +185,7 @@ export class SamlService {
     assertionConsumerServiceUrl: string;
     singleLogoutServiceUrl?: string;
   }): string {
-    return buildXmlFromTemplate({
+    return buildFromTemplate({
       templatePath: 'src/templates/sp_metadata.ejs',
       data: {
         issuer,
