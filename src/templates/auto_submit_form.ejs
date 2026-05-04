@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SAML Response</title>
+    </head>
+    <body>
+        <form method="POST" action="<%= acsUrl %>" id="samlForm">
+            <input type="hidden" name="SAMLResponse" value="<%= samlResponse %>" />
+        </form>
+        <script>
+        document.getElementById('samlForm').submit();
+        </script>
+    </body>
+</html>

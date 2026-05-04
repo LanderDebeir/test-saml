@@ -90,22 +90,9 @@ export const wrapInAutoSubmitForm = (
   samlResponse: string,
   acsUrl: string,
 ): string => {
-  return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>SAML Response</title>
-        </head>
-        <body>
-          <form method="POST" action="${acsUrl}" id="samlForm">
-            <input type="hidden" name="SAMLResponse" value="${samlResponse}" />
-          </form>
-          <script>
-            document.getElementById('samlForm').submit();
-          </script>
-        </body>
-      </html>
-    `;
+  const template = readFileSync('src/templates/auto_submit_form.ejs', 'utf-8');
+  const compiledTemplate = ejs.compile(template);
+  return compiledTemplate({ samlResponse, acsUrl });
 };
 
 const normalizeElementName = (name?: string): string => {
