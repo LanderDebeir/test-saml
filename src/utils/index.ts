@@ -86,6 +86,28 @@ export const hashPassword = (password: string): string => {
   return hash('sha256', password);
 };
 
+export const wrapInAutoSubmitForm = (
+  samlResponse: string,
+  acsUrl: string,
+): string => {
+  return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>SAML Response</title>
+        </head>
+        <body>
+          <form method="POST" action="${acsUrl}" id="samlForm">
+            <input type="hidden" name="SAMLResponse" value="${samlResponse}" />
+          </form>
+          <script>
+            document.getElementById('samlForm').submit();
+          </script>
+        </body>
+      </html>
+    `;
+};
+
 const normalizeElementName = (name?: string): string => {
   if (!name) return '';
   return name.includes(':') ? (name.split(':').pop() ?? name) : name;

@@ -42,7 +42,11 @@ export class SamlService {
     return this.idp.getMetadata();
   }
 
-  async login({ samlRequest }: { samlRequest: string }): Promise<string> {
+  async login({
+    samlRequest,
+  }: {
+    samlRequest: string;
+  }): Promise<{ context: string; acsUrl: string }> {
     if (!samlRequest) {
       throw new BadRequestException('samlRequest is required');
     }
@@ -113,10 +117,14 @@ export class SamlService {
     );
 
     this.logger.log(`Generated SAML response for SP issuer ${issuer}`);
-    return context;
+    return { context, acsUrl: assertionConsumerServiceUrl };
   }
 
-  async logout({ samlRequest }: { samlRequest: string }): Promise<string> {
+  async logout({
+    samlRequest,
+  }: {
+    samlRequest: string;
+  }): Promise<{ context: string; acsUrl: string }> {
     if (!samlRequest) {
       throw new BadRequestException('samlRequest is required');
     }
@@ -156,7 +164,7 @@ export class SamlService {
     );
 
     this.logger.log(`Generated SAML logout response for SP issuer ${issuer}`);
-    return context;
+    return { context, acsUrl: singleLogoutServiceUrl };
   }
 
   private extractIssuerFromAuthnRequest(
