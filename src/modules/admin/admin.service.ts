@@ -9,7 +9,7 @@ const GENERATED_CONFIG = path.join(ADMIN_DATA_DIR, 'generated-config.json');
 
 interface ServiceAttribute {
   name: string;
-  description?: string;
+  type: string;
 }
 
 interface StoreShape {
@@ -48,11 +48,33 @@ export class AdminService {
       if (!store.assignments) {
         store.assignments = {};
       }
+      store.services = store.services.map((service) => ({
+        ...service,
+        attributes: (service.attributes || []).map((attribute) => ({
+          name: attribute.name,
+          type: this.normalizeAttributeType(
+            (attribute as { type?: string; description?: string }).type ??
+              (attribute as { type?: string; description?: string }).description,
+          ),
+        })),
+      }));
       return store;
     } catch (e) {
       await this.writeStore(defaultStore);
       return defaultStore;
     }
+  }
+
+  private normalizeAttributeType(type?: string) {
+    const normalized = (type || 'string').toLowerCase();
+    if (normalized === 'integer') {
+      return 'number';
+    }
+    return ['string', 'boolean', 'number', 'email', 'array'].includes(
+      normalized,
+    )
+      ? normalized
+      : 'string';
   }
 
   private async writeStore(store: StoreShape) {
@@ -114,11 +136,11 @@ export class AdminService {
   async addServiceAttribute({
     serviceId,
     attributeName,
-    attributeDescription,
+    attributeType,
   }: {
     serviceId: number;
     attributeName: string;
-    attributeDescription?: string;
+    attributeType?: string;
   }) {
     const store = await this.readStore();
     const service = store.services.find((s) => s.id === serviceId);
@@ -129,13 +151,68 @@ export class AdminService {
     if (!service.attributes.find((a) => a.name === attributeName)) {
       service.attributes.push({
         name: attributeName,
-        description: attributeDescription,
+        type: this.normalizeAttributeType(attributeType),
       });
       await this.writeStore(store);
       this.logger.log(
         `Attribute added to service: serviceId=${serviceId}, attribute="${attributeName}"`,
       );
     }
+    return service.attributes;
+  }
+
+  async updateServiceAttribute({
+    serviceId,
+    oldAttributeName,
+    attributeName,
+    attributeType,
+  }: {
+    serviceId: number;
+    oldAttributeName: string;
+    attributeName: string;
+    attributeType?: string;
+  }) {
+    const store = await this.readStore();
+    const service = store.services.find((s) => s.id === serviceId);
+    if (!service) {
+      throw new Error(`Service ${serviceId} not found`);
+    }
+
+    if (!service.attributes) {
+      service.attributes = [];
+    }
+
+    const attribute = service.attributes.find((item) => item.name === oldAttributeName);
+    if (!attribute) {
+      throw new Error(
+        `Attribute "${oldAttributeName}" not found for service ${serviceId}`,
+      );
+    }
+
+    const normalizedType = this.normalizeAttributeType(attributeType);
+    const attributeNameChanged = oldAttributeName !== attributeName;
+
+    attribute.name = attributeName;
+    attribute.type = normalizedType;
+
+    if (attributeNameChanged) {
+      for (const userAttributesByService of Object.values(store.userAttributes)) {
+        const serviceAttributes = userAttributesByService[String(serviceId)];
+        if (!serviceAttributes) {
+          continue;
+        }
+
+        if (serviceAttributes[oldAttributeName] !== undefined) {
+          serviceAttributes[attributeName] = serviceAttributes[oldAttributeName];
+          delete serviceAttributes[oldAttributeName];
+        }
+      }
+    }
+
+    await this.writeStore(store);
+    this.logger.log(
+      `Attribute updated for service: serviceId=${serviceId}, oldAttribute="${oldAttributeName}", attribute="${attributeName}", type="${normalizedType}"`,
+    );
     return service.attributes;
   }
 

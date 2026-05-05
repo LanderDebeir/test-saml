@@ -32,11 +32,36 @@
       <% services.forEach(function(s){ %>
         <div style="margin:12px 0;padding:8px;border:1px solid #ccc;">
           <h4><%= s.name %> (#<%= s.id %>)</h4>
-          <p>Attributes: <%= (s.attributes || []).map(function(a){return a.name}).join(', ') || 'None' %></p>
+          <p>Attributes: <%= (s.attributes || []).map(function(a){return a.name + ' (' + (a.type || 'string') + ')'}).join(', ') || 'None' %></p>
+          <% (s.attributes || []).forEach(function(attr){ %>
+            <form method="post" action="/admin/service-attributes/update" style="margin:8px 0;padding:8px;background:#f7f7f7;">
+              <input type="hidden" name="serviceId" value="<%= s.id %>" />
+              <input type="hidden" name="oldAttributeName" value="<%= attr.name %>" />
+              <label>Attribute name: <input name="attributeName" value="<%= attr.name %>" required/></label>
+              <label>Type:
+                <select name="attributeType" required>
+                  <option value="string" <%= (attr.type || 'string') === 'string' ? 'selected' : '' %>>string</option>
+                  <option value="email" <%= attr.type === 'email' ? 'selected' : '' %>>email</option>
+                  <option value="number" <%= attr.type === 'number' ? 'selected' : '' %>>number</option>
+                  <option value="boolean" <%= attr.type === 'boolean' ? 'selected' : '' %>>boolean</option>
+                  <option value="array" <%= attr.type === 'array' ? 'selected' : '' %>>array</option>
+                </select>
+              </label>
+              <button type="submit">Save Attribute</button>
+            </form>
+          <% }) %>
           <form method="post" action="/admin/service-attributes" style="margin-top:6px;">
             <input type="hidden" name="serviceId" value="<%= s.id %>" />
             <label>Attribute name: <input name="attributeName" required/></label>
-            <label>Description: <input name="attributeDescription"/></label>
+            <label>Type:
+              <select name="attributeType" required>
+                <option value="string">string</option>
+                <option value="email">email</option>
+                <option value="number">number</option>
+                <option value="boolean">boolean</option>
+                <option value="array">array</option>
+              </select>
+            </label>
             <button type="submit">Add Attribute</button>
           </form>
         </div>

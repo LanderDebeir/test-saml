@@ -103,11 +103,23 @@ export class AdminController {
 
   @Post('service-attributes')
   async addServiceAttribute(@Body() body: any, @Res() res: Response) {
-    const { serviceId, attributeName, attributeDescription } = body;
+    const { serviceId, attributeName, attributeType } = body;
     await this.admin.addServiceAttribute({
       serviceId: Number(serviceId),
       attributeName,
-      attributeDescription,
+      attributeType,
+    });
+    return res.redirect('/admin');
+  }
+
+  @Post('service-attributes/update')
+  async updateServiceAttribute(@Body() body: any, @Res() res: Response) {
+    const { serviceId, oldAttributeName, attributeName, attributeType } = body;
+    await this.admin.updateServiceAttribute({
+      serviceId: Number(serviceId),
+      oldAttributeName,
+      attributeName,
+      attributeType,
     });
     return res.redirect('/admin');
   }

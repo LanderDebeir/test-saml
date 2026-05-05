@@ -164,6 +164,60 @@ export class SamlService {
       );
     }
 
+    const serviceAttributes = service?.attributes ?? [];
+    const parsedServiceAttributes = serviceAttributes
+      .map((attribute) => {
+        const rawValue = userAttributes[attribute.name];
+        if (rawValue === undefined || rawValue === null || rawValue === '') {
+          return null;
+        }
+
+        const type = (attribute.type || 'string').toLowerCase();
+        if (type === 'boolean') {
+          return {
+            name: attribute.name,
+            nameFormat:
+              'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
+            valueXsiType: 'xs:boolean',
+            value: ['true', '1', 'yes', 'on'].includes(rawValue.toLowerCase()),
+          };
+        }
+
+        if (type === 'number') {
+          const parsed = Number.parseInt(rawValue, 10);
+          return {
+            name: attribute.name,
+            nameFormat:
+              'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
+            valueXsiType: 'xs:integer',
+            value: Number.isNaN(parsed) ? rawValue : parsed,
+          };
+        }
+
+        if (type === 'array') {
+          const values = rawValue
+            .split(/[\n,]/)
+            .map((value) => value.trim())
+            .filter(Boolean);
+          return {
+            name: attribute.name,
+            nameFormat:
+              'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
+            valueXsiType: 'xs:string',
+            value: values,
+          };
+        }
+
+        return {
+          name: attribute.name,
+          nameFormat:
+            'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
+          valueXsiType: 'xs:string',
+          value: rawValue,
+        };
+      })
+      .filter((attribute) => attribute !== null);
+
     const sp = ServiceProvider({
       metadata: this.buildServiceProviderMetadata({
         issuer,
@@ -243,14 +297,8 @@ export class SamlService {
               valueXsiType: 'xs:string',
               value: user.displayName,
             },
-            // Dynamic attributes from service configuration
-            ...Object.entries(userAttributes).map(([attrName, attrValue]) => ({
-              name: attrName,
-              nameFormat:
-                'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
-              valueXsiType: 'xs:string',
-              value: attrValue,
-            })),
+            // Dynamic attributes from service configuration, parsed by type
+            ...parsedServiceAttributes,
           ],
         } as any;
 

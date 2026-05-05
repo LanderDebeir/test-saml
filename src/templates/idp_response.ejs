@@ -22,7 +22,13 @@
     <saml:AttributeStatement>
       <% for (const attr of attributes) { %>
         <saml:Attribute Name="<%= attr.name %>" NameFormat="<%= attr.nameFormat %>">
-          <saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="<%= attr.valueXsiType %>"><%= attr.value %></saml:AttributeValue>
+          <% if (Array.isArray(attr.value)) { %>
+            <% for (const value of attr.value) { %>
+              <saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="<%= attr.valueXsiType %>"><%= value %></saml:AttributeValue>
+            <% } %>
+          <% } else { %>
+            <saml:AttributeValue xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="<%= attr.valueXsiType %>"><%= attr.value %></saml:AttributeValue>
+          <% } %>
         </saml:Attribute>
       <% } %>
     </saml:AttributeStatement>
