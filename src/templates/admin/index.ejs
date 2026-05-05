@@ -58,7 +58,14 @@
             <ul>
               <% (assignments[String(u.id)]||[]).forEach(function(sid){ %>
                 <% var s = services.find(function(x){return x.id===sid}); %>
-                <li><%= s ? s.name : 'Unknown (#'+sid+')' %></li>
+                <li>
+                  <%= s ? s.name : 'Unknown (#'+sid+')' %>
+                  <form method="post" action="/admin/unassign" style="display:inline;">
+                    <input type="hidden" name="userId" value="<%= u.id %>" />
+                    <input type="hidden" name="serviceId" value="<%= sid %>" />
+                    <button type="submit" style="font-size:0.8em;padding:2px 6px;">Unassign</button>
+                  </form>
+                </li>
               <% }) %>
             </ul>
           </li>

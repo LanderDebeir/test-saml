@@ -100,6 +100,16 @@ export class AdminController {
     return res.redirect('/admin');
   }
 
+  @Post('unassign')
+  async unassign(@Body() body: any, @Res() res: Response) {
+    const { userId, serviceId } = body;
+    await this.admin.unassignServiceFromUser({
+      userId: Number(userId),
+      serviceId: Number(serviceId),
+    });
+    return res.redirect('/admin');
+  }
+
   @Post('generate')
   async generate(@Res() res: Response) {
     await this.admin.generateConfig();

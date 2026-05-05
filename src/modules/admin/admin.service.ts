@@ -107,9 +107,39 @@ export class AdminService {
     return store.assignments;
   }
 
+  async unassignServiceFromUser({
+    userId,
+    serviceId,
+  }: {
+    userId: number;
+    serviceId: number;
+  }) {
+    const store = await this.readStore();
+    const key = String(userId);
+    const existing = store.assignments[key] ?? [];
+    const index = existing.indexOf(serviceId);
+    if (index > -1) {
+      existing.splice(index, 1);
+      this.logger.log(
+        `Service unassigned from user: userId=${userId}, serviceId=${serviceId}`,
+      );
+    }
+    store.assignments[key] = existing;
+    await this.writeStore(store);
+    return store.assignments;
+  }
+
   async getAssignments() {
     const store = await this.readStore();
     return store.assignments;
+  }
+
+  async getAssignmentsBetween(
+    userId: number,
+  ): Promise<Array<{ userId: number; serviceId: number }>> {
+    const store = await this.readStore();
+    const assignedServiceIds = store.assignments[String(userId)] ?? [];
+    return assignedServiceIds.map((serviceId) => ({ userId, serviceId }));
   }
 
   async generateConfig() {
