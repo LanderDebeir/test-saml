@@ -63,11 +63,22 @@ export class AdminController {
     const users = await this.userService['prisma'].user.findMany();
     const assignments = await this.admin.getAssignments();
 
+    // Fetch user attributes for each user-service pair
+    const userAttributesByServiceAndUser: Record<string, Record<string, string>> = {};
+    for (const user of users) {
+      const serviceIds = assignments[String(user.id)] || [];
+      for (const serviceId of serviceIds) {
+        const key = `${user.id}-${serviceId}`;
+        userAttributesByServiceAndUser[key] = await this.admin.getUserAttributes(user.id, serviceId);
+      }
+    }
+
     return res.render('admin/index', {
       users,
       services,
       assignments,
       currentUserId: cookies.admin_user,
+      userAttributesByServiceAndUser,
     });
   }
 

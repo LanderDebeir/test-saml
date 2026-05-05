@@ -85,9 +85,11 @@
                     <div style="margin-left:20px;margin-top:6px;padding:6px;background:#f0f0f0;">
                       <strong>Attributes:</strong>
                       <% s.attributes.forEach(function(attr){ %>
+                        <% var attrKey = u.id + '-' + sid; %>
+                        <% var attrValue = userAttributesByServiceAndUser[attrKey] && userAttributesByServiceAndUser[attrKey][attr.name] ? userAttributesByServiceAndUser[attrKey][attr.name] : ''; %>
                         <div style="margin:6px 0;">
                           <label><%= attr.name %>:
-                            <input type="text" id="attr_<%= u.id %>_<%= sid %>_<%= attr.name %>" style="width:150px;" />
+                            <input type="text" id="attr_<%= u.id %>_<%= sid %>_<%= attr.name %>" style="width:150px;" value="<%= attrValue %>" />
                           </label>
                           <button type="button" data-user-id="<%= u.id %>" data-service-id="<%= sid %>" data-attr-name="<%= attr.name %>" onclick="setUserAttribute(this)">Set</button>
                         </div>
