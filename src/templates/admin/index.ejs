@@ -49,6 +49,11 @@
               </label>
               <button type="submit">Save Attribute</button>
             </form>
+            <form method="post" action="/admin/service-attributes/remove" style="margin-top:-4px;margin-bottom:10px;">
+              <input type="hidden" name="serviceId" value="<%= s.id %>" />
+              <input type="hidden" name="attributeName" value="<%= attr.name %>" />
+              <button type="submit" style="background:#b00020;color:#fff;">Remove Attribute</button>
+            </form>
           <% }) %>
           <form method="post" action="/admin/service-attributes" style="margin-top:6px;">
             <input type="hidden" name="serviceId" value="<%= s.id %>" />

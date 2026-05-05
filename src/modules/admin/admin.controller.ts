@@ -124,6 +124,16 @@ export class AdminController {
     return res.redirect('/admin');
   }
 
+  @Post('service-attributes/remove')
+  async removeServiceAttribute(@Body() body: any, @Res() res: Response) {
+    const { serviceId, attributeName } = body;
+    await this.admin.removeServiceAttribute({
+      serviceId: Number(serviceId),
+      attributeName,
+    });
+    return res.redirect('/admin');
+  }
+
   @Post('user-attributes')
   async setUserAttribute(@Body() body: any, @Res() res: Response) {
     const { userId, serviceId, attributeName, attributeValue } = body;

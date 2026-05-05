@@ -216,6 +216,41 @@ export class AdminService {
     return service.attributes;
   }
 
+  async removeServiceAttribute({
+    serviceId,
+    attributeName,
+  }: {
+    serviceId: number;
+    attributeName: string;
+  }) {
+    const store = await this.readStore();
+    const service = store.services.find((s) => s.id === serviceId);
+    if (!service) {
+      throw new Error(`Service ${serviceId} not found`);
+    }
+
+    const beforeCount = service.attributes?.length ?? 0;
+    service.attributes = (service.attributes || []).filter(
+      (attribute) => attribute.name !== attributeName,
+    );
+
+    for (const userAttributesByService of Object.values(store.userAttributes)) {
+      const serviceAttributes = userAttributesByService[String(serviceId)];
+      if (serviceAttributes && serviceAttributes[attributeName] !== undefined) {
+        delete serviceAttributes[attributeName];
+      }
+    }
+
+    if ((service.attributes?.length ?? 0) !== beforeCount) {
+      await this.writeStore(store);
+      this.logger.log(
+        `Attribute removed from service: serviceId=${serviceId}, attribute="${attributeName}"`,
+      );
+    }
+
+    return service.attributes;
+  }
+
   async setUserAttribute({
     userId,
     serviceId,
