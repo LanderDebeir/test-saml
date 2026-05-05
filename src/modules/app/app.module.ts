@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { SamlModule } from '../saml/saml.module';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
-  imports: [SamlModule],
+  imports: [SamlModule, AdminModule],
   controllers: [],
   providers: [],
 })

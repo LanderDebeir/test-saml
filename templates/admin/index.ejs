@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Admin Dashboard</title>
+    <style>label{display:block;margin:6px 0}</style>
+  </head>
+  <body>
+    <h1>Admin Dashboard</h1>
+
+    <section>
+      <h2>Create User</h2>
+      <form method="post" action="/admin/users">
+        <label>Email: <input name="email" type="email" required/></label>
+        <label>Display name: <input name="displayName"/></label>
+        <label>Password: <input name="password" type="password" required/></label>
+        <button>Create</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Create Service</h2>
+      <form method="post" action="/admin/services">
+        <label>Name: <input name="name" required/></label>
+        <label>Description: <input name="description"/></label>
+        <button>Create Service</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Assign Service to User</h2>
+      <form method="post" action="/admin/assign">
+        <label>User:
+          <select name="userId">
+            <% users.forEach(function(u){ %>
+              <option value="<%= u.id %>"><%= u.displayName || u.email %> (#<%= u.id %>)</option>
+            <% }) %>
+          </select>
+        </label>
+        <label>Service:
+          <select name="serviceId">
+            <% services.forEach(function(s){ %>
+              <option value="<%= s.id %>"><%= s.name %> (#<%= s.id %>)</option>
+            <% }) %>
+          </select>
+        </label>
+        <button>Assign</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Existing Users</h2>
+      <ul>
+        <% users.forEach(function(u){ %>
+          <li>
+            <strong><%= u.displayName || u.email %></strong> (#<%= u.id %>)
+            <br/>Assigned services:
+            <ul>
+              <% (assignments[String(u.id)]||[]).forEach(function(sid){ %>
+                <% var s = services.find(function(x){return x.id===sid}); %>
+                <li><%= s ? s.name : 'Unknown (#'+sid+')' %></li>
+              <% }) %>
+            </ul>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+
+    <section>
+      <form method="post" action="/admin/generate">
+        <button>Generate Configuration</button>
+      </form>
+    </section>
+  </body>
+</html>
