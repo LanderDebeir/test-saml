@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Post, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { SamlService } from './saml.service';
-import { buildFromTemplate} from 'src/utils';
+import { buildFromTemplate } from 'src/utils';
 
 @Controller({ version: '1' })
 export class SamlController {
