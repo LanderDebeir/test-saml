@@ -64,7 +64,7 @@ export class SamlService {
   ) {}
 
   async getMetadata() {
-    return this.idp.getMetadata();
+    return { metadata: this.idp.getMetadata() };
   }
 
   async login({
