@@ -117,6 +117,10 @@ export class SamlService {
         issuer,
         assertionConsumerServiceUrl,
       }),
+      privateKey: readFileSync(resolve(process.cwd(), 'config/certificates/saml-private-key.key')),
+      signingCert: readFileSync(
+        resolve(process.cwd(), 'config/certificates/saml-certificate.cer'),
+      ),
     });
 
     const { context } = await this.idp.createLoginResponse(
@@ -174,6 +178,10 @@ export class SamlService {
         assertionConsumerServiceUrl: singleLogoutServiceUrl,
         singleLogoutServiceUrl,
       }),
+      privateKey: readFileSync(resolve(process.cwd(), 'config/certificates/saml-private-key.key')),
+      signingCert: readFileSync(
+        resolve(process.cwd(), 'config/certificates/saml-certificate.cer'),
+      ),
     });
 
     const { context } = await this.idp.createLogoutResponse(
