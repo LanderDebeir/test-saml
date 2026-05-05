@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { SamlService } from './saml.service';
 import { buildFromTemplate } from 'src/utils';
@@ -11,6 +11,27 @@ export class SamlController {
   getMetadata(@Res({ passthrough: true }) response: Response) {
     response.type('application/json');
     return this.samlService.getMetadata();
+  }
+  @Get('login')
+  async loginPage(
+    @Query()
+    query: {
+      SAMLRequest: string;
+      RelayState: string;
+    },
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const viewModel = this.samlService.prepareLoginView({
+      SAMLRequest: query.SAMLRequest,
+      RelayState: query.RelayState,
+    });
+    response.type('text/html');
+    return this.renderLoginView({
+      SAMLRequest: query.SAMLRequest,
+      RelayState: viewModel.relayState,
+      issuer: viewModel.issuer,
+      assertionConsumerServiceUrl: viewModel.assertionConsumerServiceUrl,
+    });
   }
 
   @Post('login')
