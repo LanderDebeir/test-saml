@@ -28,6 +28,22 @@
     </section>
 
     <section>
+      <h2>Service Attributes</h2>
+      <% services.forEach(function(s){ %>
+        <div style="margin:12px 0;padding:8px;border:1px solid #ccc;">
+          <h4><%= s.name %> (#<%= s.id %>)</h4>
+          <p>Attributes: <%= (s.attributes || []).map(function(a){return a.name}).join(', ') || 'None' %></p>
+          <form method="post" action="/admin/service-attributes" style="margin-top:6px;">
+            <input type="hidden" name="serviceId" value="<%= s.id %>" />
+            <label>Attribute name: <input name="attributeName" required/></label>
+            <label>Description: <input name="attributeDescription"/></label>
+            <button type="submit">Add Attribute</button>
+          </form>
+        </div>
+      <% }) %>
+    </section>
+
+    <section>
       <h2>Assign Service to User</h2>
       <form method="post" action="/admin/assign">
         <label>User:
@@ -65,6 +81,19 @@
                     <input type="hidden" name="serviceId" value="<%= sid %>" />
                     <button type="submit" style="font-size:0.8em;padding:2px 6px;">Unassign</button>
                   </form>
+                  <% if (s && s.attributes && s.attributes.length > 0) { %>
+                    <div style="margin-left:20px;margin-top:6px;padding:6px;background:#f0f0f0;">
+                      <strong>Attributes:</strong>
+                      <% s.attributes.forEach(function(attr){ %>
+                        <div style="margin:6px 0;">
+                          <label><%= attr.name %>:
+                            <input type="text" id="attr_<%= u.id %>_<%= sid %>_<%= attr.name %>" style="width:150px;" />
+                          </label>
+                          <button type="button" data-user-id="<%= u.id %>" data-service-id="<%= sid %>" data-attr-name="<%= attr.name %>" onclick="setUserAttribute(this)">Set</button>
+                        </div>
+                      <% }) %>
+                    </div>
+                  <% } %>
                 </li>
               <% }) %>
             </ul>
@@ -72,6 +101,38 @@
         <% }) %>
       </ul>
     </section>
+
+    <script>
+      function setUserAttribute(button) {
+        const userId = button.getAttribute('data-user-id');
+        const serviceId = button.getAttribute('data-service-id');
+        const attributeName = button.getAttribute('data-attr-name');
+        const inputId = 'attr_' + userId + '_' + serviceId + '_' + attributeName;
+        const attributeValue = document.getElementById(inputId).value;
+        
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '/admin/user-attributes';
+        
+        const inputs = [
+          { name: 'userId', value: userId },
+          { name: 'serviceId', value: serviceId },
+          { name: 'attributeName', value: attributeName },
+          { name: 'attributeValue', value: attributeValue }
+        ];
+        
+        inputs.forEach(function(input) {
+          const field = document.createElement('input');
+          field.type = 'hidden';
+          field.name = input.name;
+          field.value = input.value;
+          form.appendChild(field);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
+      }
+    </script>
 <!---->
     <!-- <section>
       <form method="post" action="/admin/generate">

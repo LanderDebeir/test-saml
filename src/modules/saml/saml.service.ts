@@ -54,12 +54,6 @@ export class SamlService {
           valueXsiType: 'xs:string',
           valueTag: 'displayName',
         },
-        {
-          name: 'imageUrl',
-          nameFormat: 'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
-          valueXsiType: 'xs:string',
-          valueTag: 'imageUrl',
-        },
       ],
     },
   });
@@ -160,6 +154,16 @@ export class SamlService {
       );
     }
 
+    // Get service ID and user attributes for this service
+    const service = await this.adminService.getServiceByName(issuer);
+    let userAttributes: Record<string, string> = {};
+    if (service) {
+      userAttributes = await this.adminService.getUserAttributes(
+        user.id,
+        service.id,
+      );
+    }
+
     const sp = ServiceProvider({
       metadata: this.buildServiceProviderMetadata({
         issuer,
@@ -191,7 +195,7 @@ export class SamlService {
           nameId: user.email,
           email: user.email,
           displayName: user.displayName,
-          imageUrl: user.imageUrl,
+          //imageUrl: user.imageUrl,
         },
       },
       // customTagReplacement: render our EJS idp template using the user values
@@ -239,13 +243,14 @@ export class SamlService {
               valueXsiType: 'xs:string',
               value: user.displayName,
             },
-            {
-              name: 'imageUrl',
+            // Dynamic attributes from service configuration
+            ...Object.entries(userAttributes).map(([attrName, attrValue]) => ({
+              name: attrName,
               nameFormat:
                 'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
               valueXsiType: 'xs:string',
-              value: user.imageUrl,
-            },
+              value: attrValue,
+            })),
           ],
         } as any;
 

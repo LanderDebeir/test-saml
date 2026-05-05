@@ -90,6 +90,29 @@ export class AdminController {
     return res.redirect('/admin');
   }
 
+  @Post('service-attributes')
+  async addServiceAttribute(@Body() body: any, @Res() res: Response) {
+    const { serviceId, attributeName, attributeDescription } = body;
+    await this.admin.addServiceAttribute({
+      serviceId: Number(serviceId),
+      attributeName,
+      attributeDescription,
+    });
+    return res.redirect('/admin');
+  }
+
+  @Post('user-attributes')
+  async setUserAttribute(@Body() body: any, @Res() res: Response) {
+    const { userId, serviceId, attributeName, attributeValue } = body;
+    await this.admin.setUserAttribute({
+      userId: Number(userId),
+      serviceId: Number(serviceId),
+      attributeName,
+      attributeValue,
+    });
+    return res.redirect('/admin');
+  }
+
   @Post('assign')
   async assign(@Body() body: any, @Res() res: Response) {
     const { userId, serviceId } = body;

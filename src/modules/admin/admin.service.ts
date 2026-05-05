@@ -7,14 +7,26 @@ const ADMIN_DATA_DIR = path.join(process.cwd(), 'config', 'admin');
 const STORE_PATH = path.join(ADMIN_DATA_DIR, 'admin-store.json');
 const GENERATED_CONFIG = path.join(ADMIN_DATA_DIR, 'generated-config.json');
 
+interface ServiceAttribute {
+  name: string;
+  description?: string;
+}
+
 interface StoreShape {
-  services: Array<{ id: number; name: string; description?: string }>;
+  services: Array<{
+    id: number;
+    name: string;
+    description?: string;
+    attributes: ServiceAttribute[]; // attributes this service requires
+  }>;
   assignments: Record<string, number[]>; // userId -> serviceIds
+  userAttributes: Record<string, Record<string, Record<string, string>>>; // userId -> serviceId -> attributeName -> value
 }
 
 const defaultStore: StoreShape = {
   services: [],
   assignments: {},
+  userAttributes: {},
 };
 
 @Injectable()
@@ -25,7 +37,18 @@ export class AdminService {
   private async readStore(): Promise<StoreShape> {
     try {
       const raw = await fs.readFile(STORE_PATH, 'utf-8');
-      return JSON.parse(raw) as StoreShape;
+      const store = JSON.parse(raw) as StoreShape;
+      // Ensure all required properties exist (handle migrations)
+      if (!store.userAttributes) {
+        store.userAttributes = {};
+      }
+      if (!store.services) {
+        store.services = [];
+      }
+      if (!store.assignments) {
+        store.assignments = {};
+      }
+      return store;
     } catch (e) {
       await this.writeStore(defaultStore);
       return defaultStore;
@@ -71,19 +94,90 @@ export class AdminService {
   async addService({
     name,
     description,
+    attributes,
   }: {
     name: string;
     description?: string;
+    attributes?: ServiceAttribute[];
   }) {
     const store = await this.readStore();
     const id = store.services.length
       ? store.services[store.services.length - 1].id + 1
       : 1;
-    const svc = { id, name, description };
+    const svc = { id, name, description, attributes: attributes || [] };
     store.services.push(svc);
     await this.writeStore(store);
     this.logger.log(`Service created: id=${svc.id}, name="${svc.name}"`);
     return svc;
+  }
+
+  async addServiceAttribute({
+    serviceId,
+    attributeName,
+    attributeDescription,
+  }: {
+    serviceId: number;
+    attributeName: string;
+    attributeDescription?: string;
+  }) {
+    const store = await this.readStore();
+    const service = store.services.find((s) => s.id === serviceId);
+    if (!service) {
+      throw new Error(`Service ${serviceId} not found`);
+    }
+    if (!service.attributes) service.attributes = [];
+    if (!service.attributes.find((a) => a.name === attributeName)) {
+      service.attributes.push({
+        name: attributeName,
+        description: attributeDescription,
+      });
+      await this.writeStore(store);
+      this.logger.log(
+        `Attribute added to service: serviceId=${serviceId}, attribute="${attributeName}"`,
+      );
+    }
+    return service.attributes;
+  }
+
+  async setUserAttribute({
+    userId,
+    serviceId,
+    attributeName,
+    attributeValue,
+  }: {
+    userId: number;
+    serviceId: number;
+    attributeName: string;
+    attributeValue: string;
+  }) {
+    const store = await this.readStore();
+    const userKey = String(userId);
+    const serviceKey = String(serviceId);
+
+    if (!store.userAttributes[userKey]) {
+      store.userAttributes[userKey] = {};
+    }
+    if (!store.userAttributes[userKey][serviceKey]) {
+      store.userAttributes[userKey][serviceKey] = {};
+    }
+
+    store.userAttributes[userKey][serviceKey][attributeName] = attributeValue;
+    await this.writeStore(store);
+    this.logger.log(
+      `User attribute set: userId=${userId}, serviceId=${serviceId}, attribute="${attributeName}"="${attributeValue}"`,
+    );
+  }
+
+  async getUserAttributes(
+    userId: number,
+    serviceId: number,
+  ): Promise<Record<string, string>> {
+    const store = await this.readStore();
+    const userKey = String(userId);
+    const serviceKey = String(serviceId);
+    return (
+      store.userAttributes?.[userKey]?.[serviceKey] || {}
+    );
   }
 
   async assignServiceToUser({
