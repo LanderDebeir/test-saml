@@ -8,9 +8,7 @@ export class SamlController {
   constructor(private readonly samlService: SamlService) {}
 
   @Get('metadata')
-  getMetadata(
-    @Res({ passthrough: true }) response: Response,
-  ) {
+  getMetadata(@Res({ passthrough: true }) response: Response) {
     response.type('application/json');
     return this.samlService.getMetadata();
   }

@@ -123,7 +123,9 @@ export class SamlService {
         issuer,
         assertionConsumerServiceUrl,
       }),
-      privateKey: readFileSync(resolve(process.cwd(), 'config/certificates/saml-private-key.key')),
+      privateKey: readFileSync(
+        resolve(process.cwd(), 'config/certificates/saml-private-key.key'),
+      ),
       signingCert: readFileSync(
         resolve(process.cwd(), 'config/certificates/saml-certificate.cer'),
       ),
@@ -149,6 +151,69 @@ export class SamlService {
           displayName: user.displayName,
           imageUrl: user.imageUrl,
         },
+      },
+      // customTagReplacement: render our EJS idp template using the user values
+      (templateContext: string) => {
+        const now = new Date();
+        const fiveMinutesLater = new Date(now.getTime() + 5 * 60000);
+        const data = {
+          ID: `id-${Math.random().toString(36).slice(2, 10)}`,
+          AssertionID: `a-${Math.random().toString(36).slice(2, 10)}`,
+          Destination: assertionConsumerServiceUrl,
+          Audience: issuer,
+          EntityID: issuer,
+          SubjectRecipient: assertionConsumerServiceUrl,
+          Issuer: this.idp
+            ? (this.idp as any).entityMeta?.getEntityID
+              ? (this.idp as any).entityMeta.getEntityID()
+              : issuer
+            : issuer,
+          IssueInstant: now.toISOString(),
+          AssertionConsumerServiceURL: assertionConsumerServiceUrl,
+          StatusCode: 'urn:oasis:names:tc:SAML:2.0:status:Success',
+          ConditionsNotBefore: now.toISOString(),
+          ConditionsNotOnOrAfter: fiveMinutesLater.toISOString(),
+          SubjectConfirmationDataNotOnOrAfter: fiveMinutesLater.toISOString(),
+          NameIDFormat: Array.isArray(
+            (this.idp as any).entitySetting?.nameIDFormat,
+          )
+            ? (this.idp as any).entitySetting.nameIDFormat[0]
+            : (this.idp as any).entitySetting?.nameIDFormat,
+          NameID: user.email,
+          InResponseTo: requestId,
+          AuthnStatement: '',
+          attributes: [
+            {
+              name: 'email',
+              nameFormat:
+                'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
+              valueXsiType: 'xs:string',
+              value: user.email,
+            },
+            {
+              name: 'displayName',
+              nameFormat:
+                'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
+              valueXsiType: 'xs:string',
+              value: user.displayName,
+            },
+            {
+              name: 'imageUrl',
+              nameFormat:
+                'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
+              valueXsiType: 'xs:string',
+              value: user.imageUrl,
+            },
+          ],
+        } as any;
+
+        return {
+          id: data.ID,
+          context: buildFromTemplate({
+            templatePath: 'src/templates/idp_response.ejs',
+            data,
+          }),
+        };
       },
     );
 
@@ -185,7 +250,9 @@ export class SamlService {
         assertionConsumerServiceUrl: singleLogoutServiceUrl,
         singleLogoutServiceUrl,
       }),
-      privateKey: readFileSync(resolve(process.cwd(), 'config/certificates/saml-private-key.key')),
+      privateKey: readFileSync(
+        resolve(process.cwd(), 'config/certificates/saml-private-key.key'),
+      ),
       signingCert: readFileSync(
         resolve(process.cwd(), 'config/certificates/saml-certificate.cer'),
       ),
