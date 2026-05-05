@@ -2,17 +2,30 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Admin Login</title>
+    <title><%= title || 'Admin Login' %></title>
   </head>
   <body>
-    <h1>Admin Login</h1>
-    <% if (error) { %>
+    <h1><%= heading || 'Admin Login' %></h1>
+    <% if (typeof error !== 'undefined' && error) { %>
     <p style="color: red"><%= error %></p>
     <% } %>
-    <form method="post" action="/admin/login">
+    <% if (typeof samlMode !== 'undefined' && samlMode) { %>
+    <p>You are signing in to continue to <strong><%= issuer %></strong>.</p>
+    <p>The service provider ACS URL is <code><%= assertionConsumerServiceUrl %></code>.</p>
+    <% } %>
+    <form method="post" action="<%= formAction || '/admin/login' %>">
+      <input type="hidden" name="SAMLRequest" value="<%= typeof SAMLRequest !== 'undefined' ? SAMLRequest : '' %>" />
+      <% if (typeof RelayState !== 'undefined' && RelayState) { %>
+      <input type="hidden" name="RelayState" value="<%= RelayState %>" />
+      <% } %>
       <label>Email: <input type="email" name="email" required /></label><br/>
       <label>Password: <input type="password" name="password" required /></label><br/>
-      <button type="submit">Login</button>
+      <button type="submit"><%= buttonLabel || 'Login' %></button>
     </form>
+    <% if (typeof samlMode !== 'undefined' && samlMode) { %>
+    <form method="get" action="/admin" style="margin-top: 12px;">
+      <button type="submit">Go to admin dashboard</button>
+    </form>
+    <% } %>
   </body>
 </html>

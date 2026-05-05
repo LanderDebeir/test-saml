@@ -24,7 +24,14 @@ export class AdminController {
 
   @Get('login')
   loginPage(@Res() res: Response) {
-    return res.render('admin/login', { error: null });
+    return res.render('admin/login', {
+      error: null,
+      title: 'Admin Login',
+      heading: 'Admin Login',
+      formAction: '/admin/login',
+      buttonLabel: 'Login',
+      samlMode: false,
+    });
   }
 
   @Post('login')
@@ -32,7 +39,14 @@ export class AdminController {
     const { email, password } = body;
     const user = await this.userService.getByEmail({ email, password });
     if (!user) {
-      return res.render('admin/login', { error: 'Invalid credentials' });
+      return res.render('admin/login', {
+        error: 'Invalid credentials',
+        title: 'Admin Login',
+        heading: 'Admin Login',
+        formAction: '/admin/login',
+        buttonLabel: 'Login',
+        samlMode: false,
+      });
     }
 
     // Set a simple cookie to identify the logged user (no session store)

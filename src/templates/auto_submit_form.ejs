@@ -6,6 +6,9 @@
     <body>
         <form method="POST" action="<%= acsUrl %>" id="samlForm">
             <input type="hidden" name="SAMLResponse" value="<%= samlResponse %>" />
+            <% if (relayState) { %>
+            <input type="hidden" name="RelayState" value="<%= relayState %>" />
+            <% } %>
             <noscript>
                 <p>JavaScript is disabled. Please click the button below to submit the form.</p>
                 <input type="submit" value="Submit" />

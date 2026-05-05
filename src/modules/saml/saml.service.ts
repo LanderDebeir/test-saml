@@ -12,12 +12,10 @@ import { IdentityProvider, ServiceProvider } from 'samlify';
 import { resolve } from 'path';
 import {
   buildFromTemplate,
-  extractSamlAttributeFields,
   extractXmlAttributeFields,
   inflateXml,
 } from 'src/utils';
 import { UserDAO } from '../users/types/daos';
-import { env } from 'process';
 
 @Injectable()
 export class SamlService {
@@ -69,14 +67,55 @@ export class SamlService {
     private readonly userService: UserService,
   ) {}
 
+  prepareLoginView({
+    SAMLRequest,
+    RelayState,
+  }: {
+    SAMLRequest: string;
+    RelayState?: string;
+  }): {
+    issuer: string;
+    assertionConsumerServiceUrl: string;
+    relayState?: string;
+  } {
+    if (!SAMLRequest) {
+      throw new BadRequestException('SAML Request is required');
+    }
+
+    const inflatedXml = inflateXml(SAMLRequest);
+    const authnRequestFields = extractXmlAttributeFields(inflatedXml, [
+      'ID',
+      'AssertionConsumerServiceURL',
+    ]);
+
+    const requestId = authnRequestFields.id;
+    const assertionConsumerServiceUrl =
+      authnRequestFields.assertionconsumerserviceurl;
+    const issuer = this.extractIssuerFromAuthnRequest(inflatedXml);
+
+    if (!requestId || !assertionConsumerServiceUrl || !issuer) {
+      throw new BadRequestException('Invalid SAML AuthnRequest');
+    }
+
+    return {
+      issuer,
+      assertionConsumerServiceUrl,
+      relayState: RelayState,
+    };
+  }
+
   async getMetadata() {
     return { metadata: this.idp.getMetadata() };
   }
 
   async login({
     SAMLRequest,
+    email,
+    password,
   }: {
     SAMLRequest: string;
+    email: string;
+    password: string;
   }): Promise<{ context: string; acsUrl: string }> {
     if (!SAMLRequest) {
       throw new BadRequestException('SAML Request is required');
@@ -92,27 +131,14 @@ export class SamlService {
     const assertionConsumerServiceUrl =
       authnRequestFields.assertionconsumerserviceurl;
     const issuer = this.extractIssuerFromAuthnRequest(inflatedXml);
-    const samlCredentialFields = extractSamlAttributeFields(inflatedXml, [
-      'email',
-      'password',
-    ]);
 
     if (!requestId || !assertionConsumerServiceUrl || !issuer) {
       throw new BadRequestException('Invalid SAML AuthnRequest');
     }
 
-    const resolvedEmail = samlCredentialFields.email;
-    const resolvedPassword = samlCredentialFields.password;
-
-    // if (!resolvedEmail || !resolvedPassword) {
-    //   throw new BadRequestException(
-    //     'email and password must be provided as SAML attributes',
-    //   );
-    // }
-
     const user = await this.findUser({
-      email: resolvedEmail || env.TEST_USER_EMAIL,
-      password: resolvedPassword || env.TEST_USER_PASSWORD,
+      email,
+      password,
     });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
