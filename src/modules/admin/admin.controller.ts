@@ -63,13 +63,23 @@ export class AdminController {
     const users = await this.userService['prisma'].user.findMany();
     const assignments = await this.admin.getAssignments();
 
-    return res.render('admin/index', { users, services, assignments, currentUserId: cookies.admin_user });
+    return res.render('admin/index', {
+      users,
+      services,
+      assignments,
+      currentUserId: cookies.admin_user,
+    });
   }
 
   @Post('users')
   async createUser(@Body() body: any, @Res() res: Response) {
     const { email, password, displayName } = body;
-    await this.userService.createUser({ email, password, displayName, imageUrl: '' });
+    await this.userService.createUser({
+      email,
+      password,
+      displayName,
+      imageUrl: '',
+    });
     return res.redirect('/admin');
   }
 
@@ -83,7 +93,10 @@ export class AdminController {
   @Post('assign')
   async assign(@Body() body: any, @Res() res: Response) {
     const { userId, serviceId } = body;
-    await this.admin.assignServiceToUser({ userId: Number(userId), serviceId: Number(serviceId) });
+    await this.admin.assignServiceToUser({
+      userId: Number(userId),
+      serviceId: Number(serviceId),
+    });
     return res.redirect('/admin');
   }
 

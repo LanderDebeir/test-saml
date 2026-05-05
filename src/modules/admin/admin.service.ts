@@ -68,16 +68,30 @@ export class AdminService {
     return assignedServiceIds.includes(service.id);
   }
 
-  async addService({ name, description }: { name: string; description?: string }) {
+  async addService({
+    name,
+    description,
+  }: {
+    name: string;
+    description?: string;
+  }) {
     const store = await this.readStore();
-    const id = store.services.length ? store.services[store.services.length - 1].id + 1 : 1;
+    const id = store.services.length
+      ? store.services[store.services.length - 1].id + 1
+      : 1;
     const svc = { id, name, description };
     store.services.push(svc);
     await this.writeStore(store);
     return svc;
   }
 
-  async assignServiceToUser({ userId, serviceId }: { userId: number; serviceId: number }) {
+  async assignServiceToUser({
+    userId,
+    serviceId,
+  }: {
+    userId: number;
+    serviceId: number;
+  }) {
     const store = await this.readStore();
     const key = String(userId);
     const existing = store.assignments[key] ?? [];
@@ -100,12 +114,20 @@ export class AdminService {
     const config = {
       generatedAt: new Date().toISOString(),
       services,
-      users: users.map((u) => ({ id: u.id, email: u.email, displayName: u.displayName })),
+      users: users.map((u) => ({
+        id: u.id,
+        email: u.email,
+        displayName: u.displayName,
+      })),
       assignments,
     };
 
     await fs.mkdir(ADMIN_DATA_DIR, { recursive: true });
-    await fs.writeFile(GENERATED_CONFIG, JSON.stringify(config, null, 2), 'utf-8');
+    await fs.writeFile(
+      GENERATED_CONFIG,
+      JSON.stringify(config, null, 2),
+      'utf-8',
+    );
     return config;
   }
 }

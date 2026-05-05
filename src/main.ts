@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Use project root templates directory so views are available during dev/watch
-  app.setBaseViewsDir(path.join(process.cwd(), 'templates'));
+  app.setBaseViewsDir('src/templates');
   app.setViewEngine('ejs');
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
@@ -18,4 +18,3 @@ async function bootstrap() {
 }
 
 bootstrap();
-

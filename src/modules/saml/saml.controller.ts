@@ -71,7 +71,7 @@ export class SamlController {
     assertionConsumerServiceUrl: string;
   }): string {
     return buildFromTemplate({
-      templatePath: 'templates/admin/login.ejs',
+      templatePath: 'src/templates/admin/login.ejs',
       data: {
         ...data,
         title: 'Sign in to continue',
