@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '../users/user.service';
+import { AdminService } from '../admin/admin.service';
 import { readFileSync } from 'fs';
 import { IdentityProvider, ServiceProvider } from 'samlify';
 import { resolve } from 'path';
@@ -65,6 +66,7 @@ export class SamlService {
   constructor(
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    private readonly adminService: AdminService,
   ) {}
 
   prepareLoginView({
@@ -142,6 +144,17 @@ export class SamlService {
     });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const hasAccess = await this.adminService.userHasAccessToService({
+      userId: user.id,
+      serviceName: issuer,
+    });
+
+    if (!hasAccess) {
+      throw new UnauthorizedException(
+        'You are not assigned to this service provider',
+      );
     }
 
     const sp = ServiceProvider({

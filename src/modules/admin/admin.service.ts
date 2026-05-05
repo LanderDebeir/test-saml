@@ -42,6 +42,32 @@ export class AdminService {
     return store.services;
   }
 
+  async getServiceByName(name: string) {
+    const store = await this.readStore();
+    return store.services.find((service) => service.name === name) ?? null;
+  }
+
+  async getAssignedServiceIdsForUser(userId: number) {
+    const store = await this.readStore();
+    return store.assignments[String(userId)] ?? [];
+  }
+
+  async userHasAccessToService({
+    userId,
+    serviceName,
+  }: {
+    userId: number;
+    serviceName: string;
+  }) {
+    const service = await this.getServiceByName(serviceName);
+    if (!service) {
+      return false;
+    }
+
+    const assignedServiceIds = await this.getAssignedServiceIdsForUser(userId);
+    return assignedServiceIds.includes(service.id);
+  }
+
   async addService({ name, description }: { name: string; description?: string }) {
     const store = await this.readStore();
     const id = store.services.length ? store.services[store.services.length - 1].id + 1 : 1;
