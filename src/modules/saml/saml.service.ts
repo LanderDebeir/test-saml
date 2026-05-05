@@ -152,6 +152,9 @@ export class SamlService {
     });
 
     if (!hasAccess) {
+      this.logger.warn(
+        `SAML login denied: user=${user.email} (id=${user.id}) attempted to access service="${issuer}" but is not assigned to it`,
+      );
       throw new UnauthorizedException(
         'You are not assigned to this service provider',
       );

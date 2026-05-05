@@ -82,6 +82,7 @@ export class AdminService {
     const svc = { id, name, description };
     store.services.push(svc);
     await this.writeStore(store);
+    this.logger.log(`Service created: id=${svc.id}, name="${svc.name}"`);
     return svc;
   }
 
@@ -95,7 +96,12 @@ export class AdminService {
     const store = await this.readStore();
     const key = String(userId);
     const existing = store.assignments[key] ?? [];
-    if (!existing.includes(serviceId)) existing.push(serviceId);
+    if (!existing.includes(serviceId)) {
+      existing.push(serviceId);
+      this.logger.log(
+        `Service assigned to user: userId=${userId}, serviceId=${serviceId}`,
+      );
+    }
     store.assignments[key] = existing;
     await this.writeStore(store);
     return store.assignments;

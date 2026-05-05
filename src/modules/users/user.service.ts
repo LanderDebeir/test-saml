@@ -54,7 +54,7 @@ export class UserService {
     imageUrl: string;
   }) {
     try {
-      return this.prisma.user.create({
+      const user = await this.prisma.user.create({
         data: {
           email,
           password: hashPassword(password),
@@ -63,6 +63,8 @@ export class UserService {
           createdAt: new Date(),
         },
       });
+      this.logger.log(`User created: id=${user.id}, email="${user.email}"`);
+      return user;
     } catch (error) {
       this.logger.error('Error creating user', error);
       throw new Error('Failed to create user');
@@ -71,6 +73,7 @@ export class UserService {
 
   async deleteUser({ id }: { id: number }) {
     try {
+      this.logger.log(`User deleted: id=${id}`);
       return this.prisma.user.delete({
         where: { id },
       });
@@ -93,13 +96,15 @@ export class UserService {
       const user = await this.prisma.user.findUnique({ where: { id } });
       if (!user) throw new Error('User not found');
 
-      return this.prisma.user.update({
+      const updatedUser = await this.prisma.user.update({
         where: { id },
         data: {
           email: email ? email : user.email,
           password: password ? hashPassword(password) : user.password,
         },
       });
+      this.logger.log(`User updated: id=${updatedUser.id}, email="${updatedUser.email}"`);
+      return updatedUser;
     } catch (error) {
       this.logger.error('Error updating user', error);
       throw new Error('Failed to update user');
