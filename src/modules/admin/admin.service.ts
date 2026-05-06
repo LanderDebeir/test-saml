@@ -2,26 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { StoreShape, ServiceAttribute } from './types';
 
 const ADMIN_DATA_DIR = path.join(process.cwd(), 'config', 'admin');
 const STORE_PATH = path.join(ADMIN_DATA_DIR, 'admin-store.json');
-const GENERATED_CONFIG = path.join(ADMIN_DATA_DIR, 'generated-config.json');
-
-interface ServiceAttribute {
-  name: string;
-  type: string;
-}
-
-interface StoreShape {
-  services: Array<{
-    id: number;
-    name: string;
-    description?: string;
-    attributes: ServiceAttribute[]; // attributes this service requires
-  }>;
-  assignments: Record<string, number[]>; // userId -> serviceIds
-  userAttributes: Record<string, Record<string, Record<string, string>>>; // userId -> serviceId -> attributeName -> value
-}
 
 const defaultStore: StoreShape = {
   services: [],
