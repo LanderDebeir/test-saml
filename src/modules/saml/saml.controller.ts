@@ -62,6 +62,25 @@ export class SamlController {
     });
   }
 
+  @Get('logout')
+  async logoutPage(
+    @Query()
+    query: {
+      SAMLRequest: string;
+    },
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    response.type('text/html');
+    if (!query || !query.SAMLRequest) {
+      return '<!doctype html><html><body><h1>Logged out</h1></body></html>';
+    }
+
+    const { context, acsUrl } = await this.samlService.logout({
+      SAMLRequest: query.SAMLRequest,
+    });
+    return this.wrapInAutoSubmitForm(context, acsUrl);
+  }
+
   @Post('login/submit')
   @HttpCode(200)
   async submitLogin(
@@ -88,8 +107,12 @@ export class SamlController {
     },
     @Res({ passthrough: true }) response: Response,
   ) {
-    const { context, acsUrl } = await this.samlService.logout(body);
     response.type('text/html');
+    if (!body || !body.SAMLRequest) {
+      return '<!doctype html><html><body><h1>Logged out</h1></body></html>';
+    }
+
+    const { context, acsUrl } = await this.samlService.logout(body);
     return this.wrapInAutoSubmitForm(context, acsUrl);
   }
 
