@@ -6,7 +6,6 @@ export const users: {
   email: string;
   displayName: string;
   password: string;
-  imageUrl: string;
   createdAt: Date;
 }[] = [
   {
@@ -14,7 +13,6 @@ export const users: {
     email: process.env.TEST_USER_EMAIL || '',
     displayName: process.env.TEST_USER_NAME || '',
     password: hashPassword(process.env.TEST_USER_PASSWORD || ''),
-    imageUrl: process.env.TEST_USER_PFP || '',
     createdAt: new Date(),
   },
 ];

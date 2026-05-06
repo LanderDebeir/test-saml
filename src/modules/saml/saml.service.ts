@@ -210,8 +210,7 @@ export class SamlService {
 
         return {
           name: attribute.name,
-          nameFormat:
-            'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
+          nameFormat: 'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
           valueXsiType: 'xs:string',
           value: rawValue,
         };

@@ -54,7 +54,8 @@ export class AdminService {
           name: attribute.name,
           type: this.normalizeAttributeType(
             (attribute as { type?: string; description?: string }).type ??
-              (attribute as { type?: string; description?: string }).description,
+              (attribute as { type?: string; description?: string })
+                .description,
           ),
         })),
       }));
@@ -182,7 +183,9 @@ export class AdminService {
       service.attributes = [];
     }
 
-    const attribute = service.attributes.find((item) => item.name === oldAttributeName);
+    const attribute = service.attributes.find(
+      (item) => item.name === oldAttributeName,
+    );
     if (!attribute) {
       throw new Error(
         `Attribute "${oldAttributeName}" not found for service ${serviceId}`,
@@ -196,14 +199,17 @@ export class AdminService {
     attribute.type = normalizedType;
 
     if (attributeNameChanged) {
-      for (const userAttributesByService of Object.values(store.userAttributes)) {
+      for (const userAttributesByService of Object.values(
+        store.userAttributes,
+      )) {
         const serviceAttributes = userAttributesByService[String(serviceId)];
         if (!serviceAttributes) {
           continue;
         }
 
         if (serviceAttributes[oldAttributeName] !== undefined) {
-          serviceAttributes[attributeName] = serviceAttributes[oldAttributeName];
+          serviceAttributes[attributeName] =
+            serviceAttributes[oldAttributeName];
           delete serviceAttributes[oldAttributeName];
         }
       }
@@ -287,9 +293,7 @@ export class AdminService {
     const store = await this.readStore();
     const userKey = String(userId);
     const serviceKey = String(serviceId);
-    return (
-      store.userAttributes?.[userKey]?.[serviceKey] || {}
-    );
+    return store.userAttributes?.[userKey]?.[serviceKey] || {};
   }
 
   async assignServiceToUser({

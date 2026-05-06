@@ -46,12 +46,10 @@ export class UserService {
     email,
     password,
     displayName,
-    imageUrl,
   }: {
     email: string;
     password: string;
     displayName: string;
-    imageUrl: string;
   }) {
     try {
       const user = await this.prisma.user.create({
@@ -59,7 +57,6 @@ export class UserService {
           email,
           password: hashPassword(password),
           displayName,
-          imageUrl,
           createdAt: new Date(),
         },
       });
@@ -103,7 +100,9 @@ export class UserService {
           password: password ? hashPassword(password) : user.password,
         },
       });
-      this.logger.log(`User updated: id=${updatedUser.id}, email="${updatedUser.email}"`);
+      this.logger.log(
+        `User updated: id=${updatedUser.id}, email="${updatedUser.email}"`,
+      );
       return updatedUser;
     } catch (error) {
       this.logger.error('Error updating user', error);
