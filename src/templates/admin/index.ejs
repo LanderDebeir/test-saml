@@ -117,10 +117,30 @@
                       <% s.attributes.forEach(function(attr){ %>
                         <% var attrKey = u.id + '-' + sid; %>
                         <% var attrValue = userAttributesByServiceAndUser[attrKey] && userAttributesByServiceAndUser[attrKey][attr.name] ? userAttributesByServiceAndUser[attrKey][attr.name] : ''; %>
+                        <% var attrValues = attr.type === 'array' ? attrValue.split(/[\n,]/).map(function(value){ return value.trim(); }).filter(Boolean) : [attrValue]; %>
                         <div style="margin:6px 0;">
-                          <label><%= attr.name %>:
+                          <label><%= attr.name %>:</label>
+                          <% if (attr.type === 'array') { %>
+                            <div id="attr_group_<%= u.id %>_<%= sid %>_<%= attr.name %>" data-array-attribute="true" style="margin:4px 0;display:grid;gap:6px;max-width:320px;">
+                              <% if (attrValues.length > 0) { %>
+                                <% attrValues.forEach(function(value, index){ %>
+                                  <div style="display:flex;gap:6px;align-items:center;">
+                                    <input type="text" class="array-attribute-input" data-array-attribute-input="true" style="flex:1;min-width:0;" value="<%= value %>" placeholder="Value <%= index + 1 %>" />
+                                    <button type="button" onclick="removeAttributeValue(this)">Remove</button>
+                                  </div>
+                                <% }) %>
+                              <% } else { %>
+                                <div style="display:flex;gap:6px;align-items:center;">
+                                  <input type="text" class="array-attribute-input" data-array-attribute-input="true" style="flex:1;min-width:0;" value="" placeholder="Value 1" />
+                                  <button type="button" onclick="removeAttributeValue(this)">Remove</button>
+                                </div>
+                              <% } %>
+                            </div>
+                            <div style="font-size:0.85em;color:#666;">Add one input per value.</div>
+                            <button type="button" data-user-id="<%= u.id %>" data-service-id="<%= sid %>" data-attr-name="<%= attr.name %>" onclick="addAttributeValue(this)">Add value</button>
+                          <% } else { %>
                             <input type="text" id="attr_<%= u.id %>_<%= sid %>_<%= attr.name %>" style="width:150px;" value="<%= attrValue %>" />
-                          </label>
+                          <% } %>
                           <button type="button" data-user-id="<%= u.id %>" data-service-id="<%= sid %>" data-attr-name="<%= attr.name %>" onclick="setUserAttribute(this)">Set</button>
                         </div>
                       <% }) %>
@@ -135,12 +155,58 @@
     </section>
 
     <script>
+      function addAttributeValue(button) {
+        const userId = button.getAttribute('data-user-id');
+        const serviceId = button.getAttribute('data-service-id');
+        const attributeName = button.getAttribute('data-attr-name');
+        const groupId = 'attr_group_' + userId + '_' + serviceId + '_' + attributeName;
+        const group = document.getElementById(groupId);
+
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.gap = '6px';
+        row.style.alignItems = 'center';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'array-attribute-input';
+        input.setAttribute('data-array-attribute-input', 'true');
+        input.style.flex = '1';
+        input.style.minWidth = '0';
+        row.appendChild(input);
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.textContent = 'Remove';
+        removeButton.onclick = function () {
+          row.remove();
+        };
+        row.appendChild(removeButton);
+
+        group.appendChild(row);
+      }
+
+      function removeAttributeValue(button) {
+        const row = button.closest('div');
+        if (row) {
+          row.remove();
+        }
+      }
+
       function setUserAttribute(button) {
         const userId = button.getAttribute('data-user-id');
         const serviceId = button.getAttribute('data-service-id');
         const attributeName = button.getAttribute('data-attr-name');
-        const inputId = 'attr_' + userId + '_' + serviceId + '_' + attributeName;
-        const attributeValue = document.getElementById(inputId).value;
+        const groupId = 'attr_group_' + userId + '_' + serviceId + '_' + attributeName;
+        const group = document.getElementById(groupId);
+        const directInputId = 'attr_' + userId + '_' + serviceId + '_' + attributeName;
+        const directInput = document.getElementById(directInputId);
+
+        const attributeValues = group
+          ? Array.from(group.querySelectorAll('[data-array-attribute-input="true"]'))
+              .map(function (input) { return input.value.trim(); })
+              .filter(Boolean)
+          : [directInput ? directInput.value : ''];
         
         const form = document.createElement('form');
         form.method = 'post';
@@ -150,8 +216,26 @@
           { name: 'userId', value: userId },
           { name: 'serviceId', value: serviceId },
           { name: 'attributeName', value: attributeName },
-          { name: 'attributeValue', value: attributeValue }
         ];
+
+        if (group) {
+          attributeValues.forEach(function (value) {
+            const field = document.createElement('input');
+            field.type = 'hidden';
+            field.name = 'attributeValue[]';
+            field.value = value;
+            form.appendChild(field);
+          });
+          if (!attributeValues.length) {
+            const field = document.createElement('input');
+            field.type = 'hidden';
+            field.name = 'attributeValue[]';
+            field.value = '';
+            form.appendChild(field);
+          }
+        } else {
+          inputs.push({ name: 'attributeValue', value: attributeValues[0] });
+        }
         
         inputs.forEach(function(input) {
           const field = document.createElement('input');

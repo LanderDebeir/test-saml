@@ -250,7 +250,7 @@ export class AdminService {
     userId: number;
     serviceId: number;
     attributeName: string;
-    attributeValue: string;
+    attributeValue: string | string[];
   }) {
     const store = await this.readStore();
     const userKey = String(userId);
@@ -263,10 +263,15 @@ export class AdminService {
       store.userAttributes[userKey][serviceKey] = {};
     }
 
-    store.userAttributes[userKey][serviceKey][attributeName] = attributeValue;
+    const normalizedAttributeValue = Array.isArray(attributeValue)
+      ? attributeValue.map((value) => String(value)).join('\n')
+      : attributeValue;
+
+    store.userAttributes[userKey][serviceKey][attributeName] =
+      normalizedAttributeValue;
     await this.writeStore(store);
     this.logger.log(
-      `User attribute set: userId=${userId}, serviceId=${serviceId}, attribute="${attributeName}"="${attributeValue}"`,
+      `User attribute set: userId=${userId}, serviceId=${serviceId}, attribute="${attributeName}"="${normalizedAttributeValue}"`,
     );
   }
 

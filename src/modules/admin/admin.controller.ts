@@ -139,7 +139,9 @@ export class AdminController {
 
   @Post('user-attributes')
   async setUserAttribute(@Body() body: any, @Res() res: Response) {
-    const { userId, serviceId, attributeName, attributeValue } = body;
+    const { userId, serviceId, attributeName } = body;
+    const attributeValue =
+      body.attributeValue ?? body['attributeValue[]'] ?? body['attributeValue'];
     await this.admin.setUserAttribute({
       userId: Number(userId),
       serviceId: Number(serviceId),
