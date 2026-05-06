@@ -318,8 +318,10 @@ export class SamlService {
 
   async logout({
     SAMLRequest,
+    relayState,
   }: {
     SAMLRequest: string;
+    relayState?: string;
   }): Promise<{ context: string; acsUrl: string }> {
     if (!SAMLRequest) {
       throw new BadRequestException('SAML Request is required');
@@ -332,8 +334,8 @@ export class SamlService {
     ]);
 
     const requestId = logoutRequestFields.id;
-    const singleLogoutServiceUrl = logoutRequestFields.destination;
     const issuer = this.extractIssuerFromAuthnRequest(inflatedXml);
+    const singleLogoutServiceUrl = logoutRequestFields.destination;
 
     if (!requestId || !singleLogoutServiceUrl || !issuer) {
       throw new BadRequestException('Invalid SAML LogoutRequest');
@@ -342,7 +344,7 @@ export class SamlService {
     const sp = ServiceProvider({
       metadata: this.buildServiceProviderMetadata({
         issuer,
-        assertionConsumerServiceUrl: singleLogoutServiceUrl,
+        assertionConsumerServiceUrl: issuer,
         singleLogoutServiceUrl,
       }),
       privateKey: readFileSync(
@@ -363,10 +365,11 @@ export class SamlService {
         },
       },
       'post',
+      relayState,
     );
 
     this.logger.log(`Generated SAML logout response for SP issuer ${issuer}`);
-    return { context, acsUrl: singleLogoutServiceUrl };
+    return { context, acsUrl: issuer };
   }
 
   private extractIssuerFromAuthnRequest(

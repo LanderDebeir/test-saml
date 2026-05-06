@@ -64,21 +64,16 @@ export class SamlController {
 
   @Get('logout')
   async logoutPage(
-    @Query()
-    query: {
-      SAMLRequest: string;
-    },
-    @Res({ passthrough: true }) response: Response,
+    @Query('SAMLRequest') samlRequest: string,
+    @Query('RelayState') relayState?: string,
+    @Res({ passthrough: true }) response?: Response,
   ) {
-    response.type('text/html');
-    if (!query || !query.SAMLRequest) {
-      return '<!doctype html><html><body><h1>Logged out</h1></body></html>';
-    }
+    response?.type('text/html');
 
     const { context, acsUrl } = await this.samlService.logout({
-      SAMLRequest: query.SAMLRequest,
+      SAMLRequest: samlRequest,
     });
-    return this.wrapInAutoSubmitForm(context, acsUrl);
+    return this.wrapInAutoSubmitForm(context, acsUrl, relayState);
   }
 
   @Post('login/submit')
@@ -101,19 +96,37 @@ export class SamlController {
   @Post('logout')
   @HttpCode(200)
   async logout(
-    @Body()
-    body: {
-      SAMLRequest: string;
-    },
-    @Res({ passthrough: true }) response: Response,
+    @Body('SAMLRequest') samlRequest: string,
+    @Body('RelayState') relayState?: string,
+    @Res({ passthrough: true }) response?: Response,
   ) {
-    response.type('text/html');
-    if (!body || !body.SAMLRequest) {
-      return '<!doctype html><html><body><h1>Logged out</h1></body></html>';
-    }
+    response?.type('text/html');
 
-    const { context, acsUrl } = await this.samlService.logout(body);
-    return this.wrapInAutoSubmitForm(context, acsUrl);
+    const { context, acsUrl } = await this.samlService.logout({
+      SAMLRequest: samlRequest,
+    });
+    return this.wrapInAutoSubmitForm(context, acsUrl, relayState);
+  }
+
+  @Get('slo')
+  async sloGet(
+    @Query('SAMLResponse') samlResponse?: string,
+    @Query('RelayState') relayState?: string,
+    @Res({ passthrough: true }) response?: Response,
+  ) {
+    response?.type('text/html');
+    return '<!doctype html><html><body><h1>Logout successful</h1></body></html>';
+  }
+
+  @Post('slo')
+  @HttpCode(200)
+  async sloPost(
+    @Body('SAMLResponse') samlResponse?: string,
+    @Body('RelayState') relayState?: string,
+    @Res({ passthrough: true }) response?: Response,
+  ) {
+    response?.type('text/html');
+    return '<!doctype html><html><body><h1>Logout successful</h1></body></html>';
   }
 
   private renderLoginView(data: {
