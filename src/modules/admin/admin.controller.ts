@@ -168,10 +168,4 @@ export class AdminController {
     });
     return res.redirect('/admin');
   }
-
-  @Post('generate')
-  async generate(@Res() res: Response) {
-    await this.admin.generateConfig();
-    return res.redirect('/admin');
-  }
 }

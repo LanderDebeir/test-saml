@@ -351,29 +351,4 @@ export class AdminService {
     const assignedServiceIds = store.assignments[String(userId)] ?? [];
     return assignedServiceIds.map((serviceId) => ({ userId, serviceId }));
   }
-
-  async generateConfig() {
-    const services = await this.listServices();
-    const users = await this.prisma.user.findMany();
-    const assignments = await this.getAssignments();
-
-    const config = {
-      generatedAt: new Date().toISOString(),
-      services,
-      users: users.map((u) => ({
-        id: u.id,
-        email: u.email,
-        displayName: u.displayName,
-      })),
-      assignments,
-    };
-
-    await fs.mkdir(ADMIN_DATA_DIR, { recursive: true });
-    await fs.writeFile(
-      GENERATED_CONFIG,
-      JSON.stringify(config, null, 2),
-      'utf-8',
-    );
-    return config;
-  }
 }
