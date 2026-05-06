@@ -17,7 +17,7 @@
       </saml:AudienceRestriction>
     </saml:Conditions>
     <% if (AuthnStatement) { %>
-      <saml:AuthnStatement><%= AuthnStatement %></saml:AuthnStatement>
+      <%- AuthnStatement %>
     <% } %>
     <saml:AttributeStatement>
       <% for (const attr of attributes) { %>

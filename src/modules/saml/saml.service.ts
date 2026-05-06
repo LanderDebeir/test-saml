@@ -255,6 +255,7 @@ export class SamlService {
       (templateContext: string) => {
         const now = new Date();
         const fiveMinutesLater = new Date(now.getTime() + 5 * 60000);
+        const authnStatement = `<saml:AuthnStatement AuthnInstant="${now.toISOString()}" SessionIndex="${requestId}"><saml:AuthnContext><saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml:AuthnContextClassRef></saml:AuthnContext></saml:AuthnStatement>`;
         const data = {
           ID: `id-${Math.random().toString(36).slice(2, 10)}`,
           AssertionID: `a-${Math.random().toString(36).slice(2, 10)}`,
@@ -280,7 +281,7 @@ export class SamlService {
             : (this.idp as any).entitySetting?.nameIDFormat,
           NameID: user.email,
           InResponseTo: requestId,
-          AuthnStatement: '',
+          AuthnStatement: authnStatement,
           attributes: [
             {
               name: 'email',
