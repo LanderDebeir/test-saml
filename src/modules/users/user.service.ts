@@ -38,6 +38,7 @@ export class UserService {
       }
       return user;
     } catch {
+      this.logger.warn(`Failed login attempt for email: ${email}`);
       return null;
     }
   }
