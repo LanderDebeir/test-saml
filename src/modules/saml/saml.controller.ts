@@ -96,16 +96,19 @@ export class SamlController {
   @Post('logout')
   @HttpCode(200)
   async logout(
-    @Body('SAMLRequest') samlRequest: string,
-    @Body('RelayState') relayState?: string,
-    @Res({ passthrough: true }) response?: Response,
+    @Body()
+    body: {
+      SAMLRequest: string;
+      RelayState?: string;
+    },
+    @Res({ passthrough: true }) response: Response,
   ) {
-    response?.type('text/html');
+    response.type('text/html');
 
     const { context, acsUrl } = await this.samlService.logout({
-      SAMLRequest: samlRequest,
+      SAMLRequest: body.SAMLRequest,
     });
-    return this.wrapInAutoSubmitForm(context, acsUrl, relayState);
+    return this.wrapInAutoSubmitForm(context, acsUrl, body.RelayState);
   }
 
   @Get('slo')
