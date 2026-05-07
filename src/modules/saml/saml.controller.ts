@@ -22,20 +22,17 @@ export class SamlController {
   }
   @Get('login')
   async loginPage(
-    @Query()
-    query: {
-      SAMLRequest: string;
-      RelayState: string;
-    },
-    @Res({ passthrough: true }) response: Response,
+    @Query('SAMLRequest') samlRequest: string,
+    @Query('RelayState') relayState?: string,
+    @Res({ passthrough: true }) response?: Response,
   ) {
     const viewModel = this.samlService.prepareLoginView({
-      SAMLRequest: query.SAMLRequest,
-      RelayState: query.RelayState,
+      SAMLRequest: samlRequest,
+      RelayState: relayState,
     });
-    response.type('text/html');
+    response?.type('text/html');
     return this.renderLoginView({
-      SAMLRequest: query.SAMLRequest,
+      SAMLRequest: samlRequest,
       RelayState: viewModel.relayState,
       issuer: viewModel.issuer,
       assertionConsumerServiceUrl: viewModel.assertionConsumerServiceUrl,
@@ -124,11 +121,14 @@ export class SamlController {
   @Post('slo')
   @HttpCode(200)
   async sloPost(
-    @Body('SAMLResponse') samlResponse?: string,
-    @Body('RelayState') relayState?: string,
-    @Res({ passthrough: true }) response?: Response,
+    @Body()
+    body: {
+      SAMLResponse: string;
+      RelayState?: string;
+    },
+    @Res({ passthrough: true }) response: Response,
   ) {
-    response?.type('text/html');
+    response.type('text/html');
     return '<!doctype html><html><body><h1>Logout successful</h1></body></html>';
   }
 
