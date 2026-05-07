@@ -6,7 +6,7 @@ import { UserService } from '../users/user.service';
 @Controller('admin')
 export class AdminController {
   constructor(
-    private readonly admin: AdminService,
+    private readonly adminService: AdminService,
     private readonly userService: UserService,
   ) {}
 
@@ -59,9 +59,9 @@ export class AdminController {
     const cookies = this.parseCookie(req);
     if (!cookies.admin_user) return res.redirect('/admin/login');
 
-    const services = await this.admin.listServices();
+    const services = await this.adminService.listServices();
     const users = await this.userService['prisma'].user.findMany();
-    const assignments = await this.admin.getAssignments();
+    const assignments = await this.adminService.getAssignments();
 
     // Fetch user attributes for each user-service pair
     const userAttributesByServiceAndUser: Record<
@@ -73,7 +73,7 @@ export class AdminController {
       for (const serviceId of serviceIds) {
         const key = `${user.id}-${serviceId}`;
         userAttributesByServiceAndUser[key] =
-          await this.admin.getUserAttributes(user.id, serviceId);
+          await this.adminService.getUserAttributes(user.id, serviceId);
       }
     }
 
@@ -100,14 +100,14 @@ export class AdminController {
   @Post('services')
   async createService(@Body() body: any, @Res() res: Response) {
     const { name, description } = body;
-    await this.admin.addService({ name, description });
+    await this.adminService.addService({ name, description });
     return res.redirect('/admin');
   }
 
   @Post('service-attributes')
   async addServiceAttribute(@Body() body: any, @Res() res: Response) {
     const { serviceId, attributeName, attributeType } = body;
-    await this.admin.addServiceAttribute({
+    await this.adminService.addServiceAttribute({
       serviceId: Number(serviceId),
       attributeName,
       attributeType,
@@ -118,7 +118,7 @@ export class AdminController {
   @Post('service-attributes/update')
   async updateServiceAttribute(@Body() body: any, @Res() res: Response) {
     const { serviceId, oldAttributeName, attributeName, attributeType } = body;
-    await this.admin.updateServiceAttribute({
+    await this.adminService.updateServiceAttribute({
       serviceId: Number(serviceId),
       oldAttributeName,
       attributeName,
@@ -130,7 +130,7 @@ export class AdminController {
   @Post('service-attributes/remove')
   async removeServiceAttribute(@Body() body: any, @Res() res: Response) {
     const { serviceId, attributeName } = body;
-    await this.admin.removeServiceAttribute({
+    await this.adminService.removeServiceAttribute({
       serviceId: Number(serviceId),
       attributeName,
     });
@@ -142,7 +142,7 @@ export class AdminController {
     const { userId, serviceId, attributeName } = body;
     const attributeValue =
       body.attributeValue ?? body['attributeValue[]'] ?? body['attributeValue'];
-    await this.admin.setUserAttribute({
+    await this.adminService.setUserAttribute({
       userId: Number(userId),
       serviceId: Number(serviceId),
       attributeName,
@@ -154,7 +154,7 @@ export class AdminController {
   @Post('assign')
   async assign(@Body() body: any, @Res() res: Response) {
     const { userId, serviceId } = body;
-    await this.admin.assignServiceToUser({
+    await this.adminService.assignServiceToUser({
       userId: Number(userId),
       serviceId: Number(serviceId),
     });
@@ -164,7 +164,7 @@ export class AdminController {
   @Post('unassign')
   async unassign(@Body() body: any, @Res() res: Response) {
     const { userId, serviceId } = body;
-    await this.admin.unassignServiceFromUser({
+    await this.adminService.unassignServiceFromUser({
       userId: Number(userId),
       serviceId: Number(serviceId),
     });
