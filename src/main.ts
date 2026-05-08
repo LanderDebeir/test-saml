@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './modules/app/app.module';
 import * as express from 'express';
 import * as path from 'path';
+import { cwd } from 'process';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -13,6 +14,7 @@ async function bootstrap() {
   app.setViewEngine('ejs');
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
+  app.useStaticAssets(path.join(cwd(), 'shared'));
 
   await app.listen(process.env.PORT ?? 3000);
 }
