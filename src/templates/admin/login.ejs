@@ -10,7 +10,7 @@
     <main class="shell">
       <section class="intro">
         <div>
-          <% if(samlMode) { %>
+          <% if ( typeof samlMode !== 'undefined' && samlMode ) { %>
           <span class="eyebrow">SAML authentication</span>
           <% } else { %> 
           <span class="eyebrow">Admin access</span>
