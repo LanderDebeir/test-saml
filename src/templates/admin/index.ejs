@@ -17,10 +17,7 @@
       <header class="hero">
         <span class="eyebrow">Admin console</span>
         <h1>Control identity with a calmer, sharper dashboard.</h1>
-        <p class="hero-copy">
-          Create users, manage service metadata, and assign claims from a layout that feels
-          closer to a control room than a form dump.
-        </p>
+        <p class="hero-copy">Create users, manage service metadata, and assign attributes.</p>
         <div class="hero-meta">
           <span class="chip"><strong><%= userCount %></strong> users</span>
           <span class="chip"><strong><%= serviceCount %></strong> services</span>
@@ -78,7 +75,7 @@
         <div class="stack">
           <section class="panel">
             <h2>Service Attributes</h2>
-            <p class="panel-intro">Choose a service, then edit its attributes and definition without scanning the whole list.</p>
+            <p class="panel-intro">Choose a service, then edit its attributes and definition.</p>
             <% if (services.length === 0) { %>
               <p class="empty-state">No services are configured yet.</p>
             <% } else { %>
@@ -187,7 +184,7 @@
 
           <section class="panel">
             <h2>Existing Users</h2>
-            <p class="panel-intro">Pick a user, then review every service, assignment, and editable claim value from a single workspace.</p>
+            <p class="panel-intro">Pick a user, then review every service, assignment, and editable attribute value.</p>
             <% if (users.length === 0) { %>
               <p class="empty-state">No users are available yet.</p>
             <% } else { %>
