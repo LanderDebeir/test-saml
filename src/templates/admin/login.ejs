@@ -10,20 +10,36 @@
     <main class="shell">
       <section class="intro">
         <div>
+          <% if(samlMode) { %>
+          <span class="eyebrow">SAML authentication</span>
+          <% } else { %> 
           <span class="eyebrow">Admin access</span>
+          <% } %>
           <h1><%= heading || 'Admin Login' %></h1>
         </div>
         <div class="intro-note">
+          <%if (typeof samlMode !== 'undefined' && samlMode) { %>
+           <strong>SAML authentication enabled</strong>
+           <p>
+             This instance is configured to use SAML for authentication. Please sign in with your SAML identity provider to access the admin console.
+           </p>
+          <% } else { %>
           <strong>Secure entry point</strong>
           <p>
             Use your admin credentials to manage users, services, and SAML attribute mappings.
           </p>
+          <% } %>
         </div>
       </section>
 
       <section class="form-pane">
-        <h2>Welcome back</h2>
-        <p class="subcopy">Sign in to continue to the administration console.</p>
+        <% if(typeof samlMode !== 'undefined' && samlMode) { %>
+          <h2>Sign in with your SAML identity provider</h2>
+          <p class="subcopy">You will be redirected to your identity provider to complete the authentication process.</p>
+        <% } else { %>
+          <h2>Welcome back</h2>
+          <p class="subcopy">Sign in to continue to the administration console.</p>
+        <% } %>
 
         <% if (typeof error !== 'undefined' && error) { %>
         <div class="error"><%= error %></div>
