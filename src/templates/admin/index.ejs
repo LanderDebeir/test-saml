@@ -706,7 +706,7 @@
 
                 <div class="service-list-grid">
                   <% services.forEach(function(s){ %>
-                    <article class="service-overview" data-service-overview="<%= s.id %>" <%= String(s.id) === selectedServiceId ? '' : 'hidden' %>>
+                    <article class="service-overview" data-service-overview="<%= s.id %>" data-attribute-count="<%= (s.attributes || []).length %>" <%= String(s.id) === selectedServiceId ? '' : 'hidden' %>>
                       <div class="service-summary">
                         <div>
                           <h3><%= s.name %></h3>
@@ -1046,7 +1046,7 @@
         const selectedServiceName = document.getElementById('selected-service-name');
         const activePanel = document.querySelector('[data-service-overview="' + serviceId + '"]');
         if (attributeCount) {
-          const activeCount = activePanel ? activePanel.querySelectorAll('.attribute-editor').length : 0;
+          const activeCount = activePanel ? Number(activePanel.getAttribute('data-attribute-count') || '0') : 0;
           attributeCount.textContent = activeCount + ' attributes';
         }
         if (selectedServiceName && serviceOption) {
