@@ -73,34 +73,6 @@
               </div>
             </form>
           </section>
-
-          <section class="panel">
-            <h2>Assign Service to User</h2>
-            <p class="panel-intro">Connect a user to a service so SAML assertions can flow cleanly.</p>
-            <form method="post" action="/admin/assign" class="form-grid">
-              <input type="hidden" name="selectedUserId" value="<%= activeUserId %>" data-selected-user-id-field />
-              <input type="hidden" name="selectedServiceId" value="<%= activeServiceId %>" data-selected-service-id-field />
-              <div class="field">
-                <label for="assign-user">User</label>
-                <select id="assign-user" name="userId">
-                  <% users.forEach(function(u){ %>
-                    <option value="<%= u.id %>" <%= String(u.id) === activeUserId ? 'selected' : '' %>><%= u.displayName || u.email %> (#<%= u.id %>)</option>
-                  <% }) %>
-                </select>
-              </div>
-              <div class="field">
-                <label for="assign-service">Service</label>
-                <select id="assign-service" name="serviceId">
-                  <% services.forEach(function(s){ %>
-                    <option value="<%= s.id %>"><%= s.name %> (#<%= s.id %>)</option>
-                  <% }) %>
-                </select>
-              </div>
-              <div class="button-row">
-                <button type="submit">Assign</button>
-              </div>
-            </form>
-          </section>
         </div>
 
         <div class="stack">

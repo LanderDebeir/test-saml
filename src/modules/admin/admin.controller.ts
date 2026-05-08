@@ -94,7 +94,9 @@ export class AdminController {
           : '';
     const selectedServiceId =
       requestedSelectedServiceId &&
-      services.some((service) => String(service.id) === requestedSelectedServiceId)
+      services.some(
+        (service) => String(service.id) === requestedSelectedServiceId,
+      )
         ? requestedSelectedServiceId
         : services[0]
           ? String(services[0].id)
