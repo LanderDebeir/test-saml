@@ -248,7 +248,6 @@ export class SamlService {
           nameId: user.email,
           email: user.email,
           displayName: user.displayName,
-          //imageUrl: user.imageUrl,
         },
       },
       // customTagReplacement: render our EJS idp template using the user values
