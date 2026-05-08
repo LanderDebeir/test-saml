@@ -594,8 +594,8 @@
     <% const serviceCount = services.length; %>
     <% const userCount = users.length; %>
     <% const assignmentCount = Object.values(assignments).reduce(function(total, ids){ return total + ids.length; }, 0); %>
-    <% const selectedUserId = users.length ? String(users[0].id) : ''; %>
-    <% const selectedServiceId = services.length ? String(services[0].id) : ''; %>
+    <% const activeUserId = typeof selectedUserId !== 'undefined' && selectedUserId ? String(selectedUserId) : (users.length ? String(users[0].id) : ''); %>
+    <% const activeServiceId = typeof selectedServiceId !== 'undefined' && selectedServiceId ? String(selectedServiceId) : (services.length ? String(services[0].id) : ''); %>
 
     <div class="page">
       <header class="hero">
@@ -618,6 +618,8 @@
             <h2>Create User</h2>
             <p class="panel-intro">Spin up a new account for direct login or SAML-linked access.</p>
             <form method="post" action="/admin/users" class="form-grid">
+              <input type="hidden" name="selectedUserId" value="<%= activeUserId %>" data-selected-user-id-field />
+              <input type="hidden" name="selectedServiceId" value="<%= activeServiceId %>" data-selected-service-id-field />
               <div class="field">
                 <label for="user-email">Email</label>
                 <input id="user-email" name="email" type="email" required />
@@ -640,6 +642,8 @@
             <h2>Create Service</h2>
             <p class="panel-intro">Register a service provider entry and describe the target audience.</p>
             <form method="post" action="/admin/services" class="form-grid">
+              <input type="hidden" name="selectedUserId" value="<%= activeUserId %>" data-selected-user-id-field />
+              <input type="hidden" name="selectedServiceId" value="<%= activeServiceId %>" data-selected-service-id-field />
               <div class="field">
                 <label for="service-name">Service URL or name</label>
                 <input id="service-name" name="name" required />
@@ -658,11 +662,13 @@
             <h2>Assign Service to User</h2>
             <p class="panel-intro">Connect a user to a service so SAML assertions can flow cleanly.</p>
             <form method="post" action="/admin/assign" class="form-grid">
+              <input type="hidden" name="selectedUserId" value="<%= activeUserId %>" data-selected-user-id-field />
+              <input type="hidden" name="selectedServiceId" value="<%= activeServiceId %>" data-selected-service-id-field />
               <div class="field">
                 <label for="assign-user">User</label>
                 <select id="assign-user" name="userId">
                   <% users.forEach(function(u){ %>
-                    <option value="<%= u.id %>"><%= u.displayName || u.email %> (#<%= u.id %>)</option>
+                    <option value="<%= u.id %>" <%= String(u.id) === activeUserId ? 'selected' : '' %>><%= u.displayName || u.email %> (#<%= u.id %>)</option>
                   <% }) %>
                 </select>
               </div>
@@ -725,6 +731,8 @@
 
                           <% (s.attributes || []).forEach(function(attr){ %>
                             <form method="post" action="/admin/service-attributes/update" class="attribute-editor">
+                              <input type="hidden" name="selectedUserId" value="<%= activeUserId %>" data-selected-user-id-field />
+                              <input type="hidden" name="selectedServiceId" value="<%= activeServiceId %>" data-selected-service-id-field />
                               <input type="hidden" name="serviceId" value="<%= s.id %>" />
                               <input type="hidden" name="oldAttributeName" value="<%= attr.name %>" />
                               <div class="attribute-row-head">
@@ -750,6 +758,8 @@
                               </div>
                             </form>
                             <form method="post" action="/admin/service-attributes/remove" class="compact-action" style="margin-top: 10px;">
+                              <input type="hidden" name="selectedUserId" value="<%= activeUserId %>" data-selected-user-id-field />
+                              <input type="hidden" name="selectedServiceId" value="<%= activeServiceId %>" data-selected-service-id-field />
                               <input type="hidden" name="serviceId" value="<%= s.id %>" />
                               <input type="hidden" name="attributeName" value="<%= attr.name %>" />
                               <button type="submit" class="danger">Remove attribute</button>
@@ -757,6 +767,8 @@
                           <% }) %>
 
                           <form method="post" action="/admin/service-attributes" class="attribute-editor">
+                            <input type="hidden" name="selectedUserId" value="<%= activeUserId %>" data-selected-user-id-field />
+                            <input type="hidden" name="selectedServiceId" value="<%= activeServiceId %>" data-selected-service-id-field />
                             <input type="hidden" name="serviceId" value="<%= s.id %>" />
                             <div class="field">
                               <label>Attribute name</label>
@@ -796,12 +808,12 @@
                   <label for="selected-user">Select user</label>
                   <select id="selected-user" name="selectedUserId">
                     <% users.forEach(function(u){ %>
-                      <option value="<%= u.id %>" <%= String(u.id) === selectedUserId ? 'selected' : '' %>><%= u.displayName || u.email %> (#<%= u.id %>)</option>
+                      <option value="<%= u.id %>" <%= String(u.id) === activeUserId ? 'selected' : '' %>><%= u.displayName || u.email %> (#<%= u.id %>)</option>
                     <% }) %>
                   </select>
                 </div>
                 <div class="tag-list" id="selected-user-meta">
-                  <span class="tag neutral" id="selected-user-assignment-count"><%= (assignments[selectedUserId] || []).length %> services</span>
+                  <span class="tag neutral" id="selected-user-assignment-count"><%= (assignments[activeUserId] || []).length %> services</span>
                   <span class="tag neutral" id="selected-user-email"><%= users[0].email %></span>
                 </div>
               </div>
@@ -809,7 +821,7 @@
               <div class="overview-shell">
                 <% users.forEach(function(u){ %>
                   <% var userAssignments = assignments[String(u.id)] || []; %>
-                  <div class="user-overview" data-user-overview="<%= u.id %>" <%= String(u.id) === selectedUserId ? '' : 'hidden' %>>
+                  <div class="user-overview" data-user-overview="<%= u.id %>" <%= String(u.id) === activeUserId ? '' : 'hidden' %>>
                     <div class="overview-summary">
                       <div>
                         <h3><%= u.displayName || u.email %></h3>
@@ -834,12 +846,16 @@
                               <span class="status-pill <%= assigned ? 'assigned' : 'unassigned' %>"><%= assigned ? 'Assigned' : 'Not assigned' %></span>
                               <% if (assigned) { %>
                                 <form method="post" action="/admin/unassign" class="compact-action">
+                                  <input type="hidden" name="selectedUserId" value="<%= activeUserId %>" data-selected-user-id-field />
+                                  <input type="hidden" name="selectedServiceId" value="<%= activeServiceId %>" data-selected-service-id-field />
                                   <input type="hidden" name="userId" value="<%= u.id %>" />
                                   <input type="hidden" name="serviceId" value="<%= s.id %>" />
                                   <button type="submit" class="danger">Unassign</button>
                                 </form>
                               <% } else { %>
                                 <form method="post" action="/admin/assign" class="compact-action">
+                                  <input type="hidden" name="selectedUserId" value="<%= activeUserId %>" data-selected-user-id-field />
+                                  <input type="hidden" name="selectedServiceId" value="<%= activeServiceId %>" data-selected-service-id-field />
                                   <input type="hidden" name="userId" value="<%= u.id %>" />
                                   <input type="hidden" name="serviceId" value="<%= s.id %>" />
                                   <button type="submit">Assign</button>
@@ -1005,6 +1021,16 @@
         form.submit();
       }
 
+      function syncSelectionFields(userId, serviceId) {
+        document.querySelectorAll('[data-selected-user-id-field]').forEach(function(field) {
+          field.value = userId;
+        });
+
+        document.querySelectorAll('[data-selected-service-id-field]').forEach(function(field) {
+          field.value = serviceId;
+        });
+      }
+
       function updateSelectedUserOverview(userId) {
         const panels = document.querySelectorAll('[data-user-overview]');
         panels.forEach(function(panel) {
@@ -1025,6 +1051,10 @@
             selectedUserEmail.textContent = activeName;
           }
         }
+
+        const serviceSelect = document.getElementById('selected-service');
+        const currentServiceId = serviceSelect ? String(serviceSelect.value) : '';
+        syncSelectionFields(userId, currentServiceId);
       }
 
       const selectedUserSelect = document.getElementById('selected-user');
@@ -1032,7 +1062,6 @@
         selectedUserSelect.addEventListener('change', function (event) {
           updateSelectedUserOverview(String(event.target.value));
         });
-        updateSelectedUserOverview(String(selectedUserSelect.value));
       }
 
       function updateSelectedServiceOverview(serviceId) {
@@ -1052,6 +1081,10 @@
         if (selectedServiceName && serviceOption) {
           selectedServiceName.textContent = serviceOption.textContent;
         }
+
+        const userSelect = document.getElementById('selected-user');
+        const currentUserId = userSelect ? String(userSelect.value) : '';
+        syncSelectionFields(currentUserId, serviceId);
       }
 
       const selectedServiceSelect = document.getElementById('selected-service');
@@ -1059,6 +1092,11 @@
         selectedServiceSelect.addEventListener('change', function (event) {
           updateSelectedServiceOverview(String(event.target.value));
         });
+      }
+
+      if (selectedUserSelect && selectedServiceSelect) {
+        syncSelectionFields(String(selectedUserSelect.value), String(selectedServiceSelect.value));
+        updateSelectedUserOverview(String(selectedUserSelect.value));
         updateSelectedServiceOverview(String(selectedServiceSelect.value));
       }
     </script>

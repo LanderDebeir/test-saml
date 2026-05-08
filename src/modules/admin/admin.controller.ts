@@ -22,6 +22,21 @@ export class AdminController {
     return map;
   }
 
+  private buildSelectionRedirect(body: any) {
+    const params = new URLSearchParams();
+
+    if (body.selectedUserId) {
+      params.set('selectedUserId', String(body.selectedUserId));
+    }
+
+    if (body.selectedServiceId) {
+      params.set('selectedServiceId', String(body.selectedServiceId));
+    }
+
+    const query = params.toString();
+    return query ? `/admin?${query}` : '/admin';
+  }
+
   @Get('login')
   loginPage(@Res() res: Response) {
     return res.render('admin/login', {
@@ -62,6 +77,28 @@ export class AdminController {
     const services = await this.adminService.listServices();
     const users = await this.userService['prisma'].user.findMany();
     const assignments = await this.adminService.getAssignments();
+    const requestedSelectedUserId =
+      typeof req.query.selectedUserId === 'string'
+        ? req.query.selectedUserId
+        : undefined;
+    const requestedSelectedServiceId =
+      typeof req.query.selectedServiceId === 'string'
+        ? req.query.selectedServiceId
+        : undefined;
+    const selectedUserId =
+      requestedSelectedUserId &&
+      users.some((user) => String(user.id) === requestedSelectedUserId)
+        ? requestedSelectedUserId
+        : users[0]
+          ? String(users[0].id)
+          : '';
+    const selectedServiceId =
+      requestedSelectedServiceId &&
+      services.some((service) => String(service.id) === requestedSelectedServiceId)
+        ? requestedSelectedServiceId
+        : services[0]
+          ? String(services[0].id)
+          : '';
 
     // Fetch user attributes for each user-service pair
     const userAttributesByServiceAndUser: Record<
@@ -82,6 +119,8 @@ export class AdminController {
       services,
       assignments,
       currentUserId: cookies.admin_user,
+      selectedUserId,
+      selectedServiceId,
       userAttributesByServiceAndUser,
     });
   }
@@ -94,14 +133,14 @@ export class AdminController {
       password,
       displayName,
     });
-    return res.redirect('/admin');
+    return res.redirect(this.buildSelectionRedirect(body));
   }
 
   @Post('services')
   async createService(@Body() body: any, @Res() res: Response) {
     const { name, description } = body;
     await this.adminService.addService({ name, description });
-    return res.redirect('/admin');
+    return res.redirect(this.buildSelectionRedirect(body));
   }
 
   @Post('service-attributes')
@@ -112,7 +151,7 @@ export class AdminController {
       attributeName,
       attributeType,
     });
-    return res.redirect('/admin');
+    return res.redirect(this.buildSelectionRedirect(body));
   }
 
   @Post('service-attributes/update')
@@ -124,7 +163,7 @@ export class AdminController {
       attributeName,
       attributeType,
     });
-    return res.redirect('/admin');
+    return res.redirect(this.buildSelectionRedirect(body));
   }
 
   @Post('service-attributes/remove')
@@ -134,7 +173,7 @@ export class AdminController {
       serviceId: Number(serviceId),
       attributeName,
     });
-    return res.redirect('/admin');
+    return res.redirect(this.buildSelectionRedirect(body));
   }
 
   @Post('user-attributes')
@@ -148,7 +187,7 @@ export class AdminController {
       attributeName,
       attributeValue,
     });
-    return res.redirect('/admin');
+    return res.redirect(this.buildSelectionRedirect(body));
   }
 
   @Post('assign')
@@ -158,7 +197,7 @@ export class AdminController {
       userId: Number(userId),
       serviceId: Number(serviceId),
     });
-    return res.redirect('/admin');
+    return res.redirect(this.buildSelectionRedirect(body));
   }
 
   @Post('unassign')
@@ -168,6 +207,6 @@ export class AdminController {
       userId: Number(userId),
       serviceId: Number(serviceId),
     });
-    return res.redirect('/admin');
+    return res.redirect(this.buildSelectionRedirect(body));
   }
 }
